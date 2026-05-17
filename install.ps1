@@ -2,64 +2,37 @@
 # Installs pynet-mcp-bridge and configures all detected AI clients:
 #   Claude Desktop, Claude Code (VS Code), Cline, Roo Code
 
-function Format-Json([string]$json) {
-    $indent = 0
-    $result = [System.Text.StringBuilder]::new()
-    $inString = $false
-    for ($i = 0; $i -lt $json.Length; $i++) {
-        $char = $json[$i]
-        if ($char -eq '"' -and ($i -eq 0 -or $json[$i - 1] -ne '\')) { $inString = !$inString }
-        if ($inString) { [void]$result.Append($char); continue }
-        switch ($char) {
-            '{' { [void]$result.Append($char); [void]$result.Append("`n"); $indent++; [void]$result.Append(' ' * (2 * $indent)) }
-            '}' { [void]$result.Append("`n"); $indent--; [void]$result.Append(' ' * (2 * $indent)); [void]$result.Append($char) }
-            '[' { [void]$result.Append($char); [void]$result.Append("`n"); $indent++; [void]$result.Append(' ' * (2 * $indent)) }
-            ']' { [void]$result.Append("`n"); $indent--; [void]$result.Append(' ' * (2 * $indent)); [void]$result.Append($char) }
-            ',' { [void]$result.Append($char); [void]$result.Append("`n"); [void]$result.Append(' ' * (2 * $indent)) }
-            ':' { [void]$result.Append($char); [void]$result.Append(' ') }
-            default { if ($char -notin ' ', "`t", "`n", "`r") { [void]$result.Append($char) } }
-        }
-    }
-    return $result.ToString()
-}
-
 function Add-McpServer($configPath, $createEmpty) {
-    if (Test-Path $configPath) {
-        try {
-            $config = [System.IO.File]::ReadAllText($configPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
-        } catch {
-            Write-Host "  WARNING: Existing config is invalid. Creating a new one." -ForegroundColor DarkYellow
-            $config = [PSCustomObject]@{ mcpServers = [PSCustomObject]@{} }
+    try {
+        if (Test-Path $configPath) {
+            $raw = [System.IO.File]::ReadAllText($configPath, [System.Text.Encoding]::UTF8)
+        } elseif ($createEmpty) {
+            $raw = '{}'
+        } else {
+            return $false
         }
-    } else {
-        if (-not $createEmpty) { return $false }
-        $config = [PSCustomObject]@{ mcpServers = [PSCustomObject]@{} }
+
+        $entryJson = '"pynet-bridge":{"type":"stdio","command":"pynet-bridge","args":[]}'
+
+        if ($raw -match '"pynet-bridge"\s*:') {
+            $raw = [regex]::Replace($raw, '"pynet-bridge"\s*:\s*\{[^{}]*\}', $entryJson)
+        } elseif ($raw -match '"mcpServers"\s*:\s*\{') {
+            $raw = [regex]::Replace($raw, '("mcpServers"\s*:\s*\{)', "`$1$entryJson,")
+        } elseif ($raw -match '^\s*\{') {
+            $raw = [regex]::Replace($raw, '^\s*\{', "{`"mcpServers`":{$entryJson},")
+        } else {
+            $raw = "{`"mcpServers`":{$entryJson}}"
+        }
+
+        $configDir = Split-Path $configPath
+        if ($configDir -and -not (Test-Path $configDir)) { New-Item -ItemType Directory -Path $configDir -Force | Out-Null }
+
+        [System.IO.File]::WriteAllText($configPath, $raw, [System.Text.UTF8Encoding]::new($false))
+        return $true
+    } catch {
+        Write-Host "  WARNING: Could not configure $configPath" -ForegroundColor DarkYellow
+        return $false
     }
-
-    if (-not $config.PSObject.Properties['mcpServers']) {
-        $config | Add-Member -MemberType NoteProperty -Name mcpServers -Value ([PSCustomObject]@{})
-    }
-
-    $entry = [PSCustomObject]@{
-        type    = "stdio"
-        command = "pynet-bridge"
-        args    = @()
-    }
-
-    if ($config.mcpServers.PSObject.Properties['pynet-bridge']) {
-        $config.mcpServers.'pynet-bridge' = $entry
-    } else {
-        $config.mcpServers | Add-Member -MemberType NoteProperty -Name 'pynet-bridge' -Value $entry
-    }
-
-    $configDir = Split-Path $configPath
-    if (-not (Test-Path $configDir)) { New-Item -ItemType Directory -Path $configDir | Out-Null }
-
-    $compact = $config | ConvertTo-Json -Depth 10 -Compress
-    $compact = $compact -replace '"args":null', '"args":[]'
-    $pretty  = Format-Json $compact
-    [System.IO.File]::WriteAllText($configPath, $pretty, [System.Text.UTF8Encoding]::new($false))
-    return $true
 }
 
 Write-Host ""
