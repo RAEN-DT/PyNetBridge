@@ -299,9 +299,9 @@ Natural Language → AI → Python Script → PyNet → Autodesk → BIM Action
 
 | Component | Repository | Purpose |
 | :--- | :--- | :--- |
-| **PyNet Platform** | [rafa2403nunez-droid/PyNet](https://github.com/rafa2403nunez-droid/PyNet) | Navisworks, Revit & Civil 3D plugin — hosts the Python.NET engine |
+| **PyNet Platform** | [PyNet](https://github.com/rafa2403nunez-droid/PyNet) | Navisworks, Revit & Civil 3D plugin — hosts the Python.NET engine |
 | **PyNet Bridge (MCP)** | This repo | MCP server - connects AI models to PyNET with including secure scripts validation|
-| **PyNet Library** | [rafa2403nunez-droid/PyNetLibrary](https://github.com/rafa2403nunez-droid/PyNetLibrary) | Script reference library and AI context |
+| **PyNet Library** | [PyNetLibrary](https://github.com/rafa2403nunez-droid/PyNetLibrary) | Script reference library and AI context |
 
 
 ## 📄 License
