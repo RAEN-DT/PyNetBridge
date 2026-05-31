@@ -3,7 +3,7 @@
 </p>
 
 
-# 🐍 PyNet Platform Bridge
+# PyNet Platform Bridge
 
 **PyNet Platform Bridge** is the execution layer that allows AI models to control Autodesk tools in real-time.
 
