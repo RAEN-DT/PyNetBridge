@@ -358,7 +358,7 @@ Full privacy policy: **https://privacy.raendt.com/**
 
 * **Issues / bug reports:** [GitHub Issues](https://github.com/Rafael-NunezDeArenas/PyNetBridge/issues)
 * **FAQ:** [PyNet FAQs](https://github.com/Rafael-NunezDeArenas/PyNet/wiki/PyNET-FAQs)
-* **Contact:** rafa2403nunez@gmail.com
+* **Contact:** info@raendt.com
 
 ## 🖥️ Platform Support
 
