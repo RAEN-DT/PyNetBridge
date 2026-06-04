@@ -4,7 +4,7 @@
   "display_name": "PyNet Platform Bridge",
   "version": "1.4.9",
   "description": "Connects AI models with Autodesk desktop tools (Navisworks, Revit, Civil 3D) via the PyNet ecosystem for BIM/engineering automation.",
-  "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.",
+  "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.\n\nRequirements: Windows, Python 3.10-3.13, and the 'uv' package manager (https://docs.astral.sh/uv/) available on PATH — the server is launched via 'uvx pynet-mcp-bridge', which fetches the package from PyPI. Install uv with: winget install astral-sh.uv. Also requires the PyNet plugin installed in your Autodesk application.",
   "author": {
     "name": "RAEN Digital Tools",
     "url": "https://github.com/Rafael-NunezDeArenas"

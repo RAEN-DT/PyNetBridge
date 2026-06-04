@@ -106,7 +106,7 @@ This installs:
 * **PyNet Platform** plugin installed in Navisworks/Revit.
 * Python 3.10 or higher → [python.org](https://www.python.org/downloads/)
   > ⚠️ **Python 3.14 is not yet supported.** The `pythonnet` runtime currently supports Python 3.7 through 3.13. If you encounter a `System.NotSupportedException` mentioning an unsupported ABI version, install Python 3.12 or 3.13 and configure PyNet to use it.
-* **uv** → [docs.astral.sh/uv](https://docs.astral.sh/uv/)
+* **uv** → [docs.astral.sh/uv](https://docs.astral.sh/uv/) — **required.** The Claude Desktop extension (`.mcpb`) launches the server with `uvx pynet-mcp-bridge`, so `uv` must be installed and on your `PATH`. Install it with `winget install astral-sh.uv`. Without `uv`, the extension will fail to start.
 * **Git** → [git-scm.com](https://git-scm.com/downloads) — required for VS Code extensions (Claude Code, Cline, Roo Code) to function correctly.
 * For Cline / Roo Code: **VS Code** → [code.visualstudio.com](https://code.visualstudio.com/)
 
