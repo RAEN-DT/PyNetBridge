@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "pynet-mcp-bridge",
   "display_name": "PyNet Platform Bridge",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "Connects AI models with Autodesk desktop tools (Navisworks, Revit, Civil 3D) via the PyNet ecosystem for BIM/engineering automation.",
   "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.",
   "author": {
@@ -20,8 +20,8 @@
     "type": "python",
     "entry_point": "pynet_mcp/server.py",
     "mcp_config": {
-      "command": "python",
-      "args": ["-m", "pynet_mcp.server"]
+      "command": "uvx",
+      "args": ["pynet-mcp-bridge"]
     }
   },
   "tools_generated": true,

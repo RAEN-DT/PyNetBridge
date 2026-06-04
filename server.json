@@ -6,12 +6,12 @@
     "url": "https://github.com/Rafael-NunezDeArenas/PyNetBridge",
     "source": "github"
   },
-  "version": "1.4.5",
+  "version": "1.4.9",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "pynet-mcp-bridge",
-      "version": "1.4.5",
+      "version": "1.4.9",
       "transport": {
         "type": "stdio"
       }

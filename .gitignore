@@ -425,3 +425,7 @@ FodyWeavers.xsd
 # Python build artifacts
 dist/
 *.egg-info/
+
+# MCPB bundle (submission artifact) and bundled deps
+*.mcpb
+lib/

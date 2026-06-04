@@ -1,0 +1,31 @@
+# Virtual environments & build artifacts
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+
+# Version control
+.git/
+.gitignore
+
+# Node / npm (only used for the mcpb CLI)
+node_modules/
+package-lock.json
+
+# Dev / publishing tooling not needed inside the bundle
+mcp-publisher.exe
+uv.lock
+install.ps1
+install-libraries.ps1
+server.json
+glama.json
+
+# Privacy page is hosted online; not needed inside the bundle
+docs/
+
+# Source logo (the packaged icon is Assets/icon-512.png)
+Assets/PyNetBridge.png
+Assets/RAENDigitalTools.png
