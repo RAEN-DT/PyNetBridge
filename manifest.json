@@ -1,0 +1,50 @@
+{
+  "manifest_version": "0.2",
+  "name": "pynet-mcp-bridge",
+  "display_name": "PyNet Platform Bridge",
+  "version": "1.4.8",
+  "description": "Connects AI models with Autodesk desktop tools (Navisworks, Revit, Civil 3D) via the PyNet ecosystem for BIM/engineering automation.",
+  "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.",
+  "author": {
+    "name": "RAEN Digital Tools",
+    "url": "https://github.com/rafa2403nunez-droid"
+  },
+  "homepage": "https://github.com/rafa2403nunez-droid/PyNetBridge",
+  "documentation": "https://github.com/rafa2403nunez-droid/PyNetBridge#readme",
+  "support": "https://github.com/rafa2403nunez-droid/PyNetBridge/issues",
+  "icon": "Assets/icon-512.png",
+  "license": "MIT",
+  "keywords": ["mcp", "navisworks", "autodesk", "BIM", "pynet", "revit", "civil3d"],
+  "privacy_policies": ["https://privacy.raendt.com/"],
+  "server": {
+    "type": "python",
+    "entry_point": "pynet_mcp/server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "pynet_mcp.server"]
+    }
+  },
+  "tools_generated": true,
+  "tools": [
+    { "name": "list_active_instances", "description": "Scans the system for running Autodesk processes with an active PyNet IPC pipe." },
+    { "name": "check_plugin_status", "description": "Handshake ping to verify the plugin listener is responsive." },
+    { "name": "get_pynet_ui_layout", "description": "Fetches the full UI structure (ButtonsModules and ScriptButtons)." },
+    { "name": "get_buttons_data", "description": "Lists all script buttons for a specific module ID." },
+    { "name": "get_output_window_status", "description": "Checks if the output window is currently available/visible." },
+    { "name": "send_command", "description": "Direct script execution in the PyNet engine (Target PID, Script Name, Content)." },
+    { "name": "send_command_by_path", "description": "Executes a script file directly by path in the PyNet engine." },
+    { "name": "configure_output_window", "description": "Toggles the visibility of the PyNet log/output window." },
+    { "name": "create_pynet_module", "description": "Creates a new custom Tab (ButtonsModule) in the Ribbon." },
+    { "name": "delete_pynet_module", "description": "Permanently deletes a module and all its contents." },
+    { "name": "deploy_script_button", "description": "Installs a new ScriptButton into a specific module." },
+    { "name": "update_script_button", "description": "Updates metadata for an existing ScriptButton or moves it to another module." },
+    { "name": "delete_script_button", "description": "Permanently removes a ScriptButton from a module by Id." }
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["win32"],
+    "runtimes": {
+      "python": ">=3.10,<3.14"
+    }
+  }
+}

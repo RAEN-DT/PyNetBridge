@@ -49,7 +49,7 @@ ALLOWED_PYTHON_IMPORTS = {
     "clr", "sys", "json", "re", "time", "datetime", "pathlib",
     "typing", "threading", "collections", "xml", "math",
     "pandas", "plotly", "matplotlib", "dash", "webbrowser",
-    "psutil", "functools",
+    "psutil", "functools", "openpyxl",
 }
 
 # Submodule-level whitelist: only http.server allowed (not http.client)
@@ -249,7 +249,7 @@ async def _send_with_heartbeat(pid: int, payload: dict, timeout: float, ctx: Con
 
 # ─── System & Connection ───
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "List Active Instances", "readOnlyHint": True})
 def list_active_instances() -> str:
     """Scans the system for running Autodesk processes with an active PyNet IPC pipe."""
     instances = []
@@ -271,7 +271,7 @@ def list_active_instances() -> str:
 
     return f"Active instances: {', '.join(instances)}" if instances else "No active instances found."
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Check Plugin Status", "readOnlyHint": True})
 def check_plugin_status(pid: int) -> str:
     """Handshake ping to verify the plugin listener is responsive."""
     payload = {
@@ -284,7 +284,7 @@ def check_plugin_status(pid: int) -> str:
 
 # ─── Execution & Console Control ───
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Send Command", "destructiveHint": True})
 async def send_command(pid: int, script_name: str, content: str, timeout: float, ctx: Context) -> str:
     """Direct script execution in the PyNet engine (Target PID, Script Name, Content)."""
     valid, message = validate_script(content)
@@ -303,7 +303,33 @@ async def send_command(pid: int, script_name: str, content: str, timeout: float,
 
     return await _send_with_heartbeat(pid, payload, timeout, ctx)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Send Command By Path", "destructiveHint": True})
+async def send_command_by_path(pid: int, script_name: str, file_path: str, timeout: float, ctx: Context) -> str:
+    """Executes a script file directly by path in the PyNet engine, without sending content inline."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except FileNotFoundError:
+        return f"Script rejected: file not found: {file_path}"
+    except Exception as e:
+        return f"Script rejected: could not read file: {e}"
+
+    valid, message = validate_script(content)
+    if not valid:
+        return f"Script rejected: {message}"
+
+    payload = {
+        "Action": "Execute",
+        "Metadata": {
+            "TargetPid": pid,
+            "ScriptName": script_name
+        },
+        "Content": content
+    }
+
+    return await _send_with_heartbeat(pid, payload, timeout, ctx)
+
+@mcp.tool(annotations={"title": "Get Output Window Status", "readOnlyHint": True})
 def get_output_window_status(pid: int) -> str:
     """Checks if the output window is currently available/visible."""
     payload = {
@@ -313,7 +339,7 @@ def get_output_window_status(pid: int) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Configure Output Window", "destructiveHint": True})
 def configure_output_window(pid: int, is_available: bool) -> str:
     """Toggles the visibility of the PyNet log/output window."""
     payload = {
@@ -326,7 +352,7 @@ def configure_output_window(pid: int, is_available: bool) -> str:
 
 # ─── Module (Tab) Management ───
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Get PyNet UI Layout", "readOnlyHint": True})
 def get_pynet_ui_layout(pid: int) -> str:
     """Fetches the full UI structure (ButtonsModules and ScriptButtons)."""
     payload = {
@@ -336,7 +362,7 @@ def get_pynet_ui_layout(pid: int) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Create PyNet Module", "destructiveHint": True})
 def create_pynet_module(pid: int, name: str) -> str:
     """Creates a new custom Tab (ButtonsModule) in the Ribbon."""
     payload = {
@@ -346,7 +372,7 @@ def create_pynet_module(pid: int, name: str) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Delete PyNet Module", "destructiveHint": True})
 def delete_pynet_module(pid: int, module_id: str) -> str:
     """Permanently deletes a module and all its contents."""
     payload = {
@@ -362,7 +388,7 @@ def delete_pynet_module(pid: int, module_id: str) -> str:
 
 # ─── Button Management ───
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Get Buttons Data", "readOnlyHint": True})
 def get_buttons_data(pid: int, module_id: str) -> str:
     """Lists all script buttons for a specific module ID."""
     payload = {
@@ -375,7 +401,7 @@ def get_buttons_data(pid: int, module_id: str) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Deploy Script Button", "destructiveHint": True})
 def deploy_script_button(
     pid: int,
     module_id: str,
@@ -402,7 +428,7 @@ def deploy_script_button(
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Update Script Button", "destructiveHint": True})
 def update_script_button(
     pid: int,
     module_id: str,
@@ -434,7 +460,7 @@ def update_script_button(
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
-@mcp.tool()
+@mcp.tool(annotations={"title": "Delete Script Button", "destructiveHint": True})
 def delete_script_button(pid: int, module_id: str, button_id: str) -> str:
     """Permanently removes a ScriptButton from a module by Id."""
     payload = {

@@ -14,9 +14,23 @@ Available integrations include **Navisworks Manage**, **Revit**, and **Civil 3D*
 This bridge acts as the connective tissue between AI logic and Autodesk desktop APIs, allowing for dynamic UI creation, script execution, and BIM process automation using natural language.
 
 
-| Tutorial | Description | Video |
+## 🎬 Demos & Tutorials
+
+See PyNet Bridge in action — these recordings show the full natural-language → BIM-action workflow inside live Autodesk models.
+
+| Demo | Description | Video |
 | :--- | :--- | :--- |
-| **PyNET and Codex Integration** | How to configure PyNet bridge with Codex and query into Navisworks. | [🎬 Watch here](https://youtu.be/HdmbCO_pTN0)  |
+| **⭐ Autonomous BIM Coordination (Revit + Navisworks)** | Claude Code drives **Revit and Navisworks simultaneously** to audit models, resolve clashes by tolerance rules, generate geometry, and self-correct API errors in real time. | [🎬 Watch here](https://www.youtube.com/watch?v=Vw7ig8TItng) |
+| **PyNET + Codex Integration** | How to configure PyNet Bridge with Codex and query into Navisworks. | [🎬 Watch here](https://youtu.be/HdmbCO_pTN0) |
+
+### ⭐ Featured: Autonomous BIM Coordination
+
+In [this technical demo](https://www.youtube.com/watch?v=Vw7ig8TItng), Claude Code connects to **Navisworks and Revit at the same time** to run a full coordination workflow end-to-end:
+
+* **Engineering criteria as a Skill** — the AI applies tolerance rules to decide which interferences to auto-approve.
+* **Real-time data auditing** — validates model integrity and detects missing parameters (`PYNET_Classification`) before coordinating.
+* **Autonomous geometry generation** — generates architectural sleeves (*pasatubos*) directly in Revit, with precise spatial rotation to match pipe angles.
+* **Self-healing code** — hits a live Revit API data-type exception, analyzes the failure, rewrites the script on the fly, and completes the task.
 
 ## 🔄 How it works
 
@@ -218,6 +232,32 @@ Once connected, the AI will have access to the full suite of PyNet tools:
 
 ---
 
+## 💡 Usage Examples
+
+These are realistic prompts you can give your AI client once PyNet Bridge is connected.
+
+### Example 1 — Discover a running model and query it (read-only)
+
+> **Prompt:** "Connect to my open Navisworks model and tell me how many items are in the current selection."
+
+The AI calls `list_active_instances` to find the running Navisworks process (e.g. `Navisworks (PID 12345)`), then calls `send_command` with a short Python script that reads the active document's selection. **Expected output:** a message like `Current selection contains 42 items.`
+
+### Example 2 — Run a clash-detection summary
+
+> **Prompt:** "Give me a summary of clash test results in the open model and export the counts as a table."
+
+The AI calls `list_active_instances`, then `send_command` with a script that iterates the `DocumentClash` results using the whitelisted `Autodesk.Navisworks.Clash` assembly and returns counts per test. **Expected output:** a table such as `Test 'Structure vs MEP': 17 active, 3 resolved`.
+
+### Example 3 — Build a custom ribbon tool on the fly
+
+> **Prompt:** "Create a new ribbon tab called 'QA' and add a button that runs my hide-empty-layers script."
+
+The AI calls `create_pynet_module` (returns a new module ID), then `deploy_script_button` with the button name, script path, icon and tooltip. **Expected output:** `Button 'Hide Empty Layers' deployed to module QA.` — visible immediately in the Autodesk ribbon.
+
+> ℹ️ Every script sent via `send_command` / `send_command_by_path` is first validated by the built-in static analyzer (see [Safe AI Execution](#-safe-ai-execution)). Scripts that violate the import/call whitelist are rejected before reaching Autodesk.
+
+---
+
 ## 🛡️ Safe AI Execution
 
 PyNet Bridge includes a built-in validation layer that ensures all AI-generated scripts are safe and controlled before execution.
@@ -303,6 +343,26 @@ Natural Language → AI → Python Script → PyNet → Autodesk → BIM Action
 | **PyNet Bridge (MCP)** | This repo | MCP server - connects AI models to PyNET with including secure scripts validation|
 | **PyNet Library** | [PyNetLibrary](https://github.com/rafa2403nunez-droid/PyNetLibrary) | Script reference library and AI context |
 
+
+## 🔒 Privacy Policy
+
+PyNet Bridge runs **entirely on your local machine**. It does **not** collect, store, or transmit any personal data, telemetry, or analytics.
+
+* **No data collection:** The server does not send any information to RAEN Digital Tools or any third party.
+* **Local-only communication:** All communication happens over a local Windows named pipe (IPC) between the MCP server and the PyNet plugin running inside Autodesk. Nothing leaves your computer.
+* **Your scripts and model data** stay on your machine and are only processed by the AI client you have connected.
+
+Full privacy policy: **https://privacy.raendt.com/**
+
+## 🆘 Support
+
+* **Issues / bug reports:** [GitHub Issues](https://github.com/rafa2403nunez-droid/PyNetBridge/issues)
+* **FAQ:** [PyNet FAQs](https://github.com/rafa2403nunez-droid/PyNet/wiki/PyNET-FAQs)
+* **Contact:** rafa2403nunez@gmail.com
+
+## 🖥️ Platform Support
+
+PyNet Bridge is **Windows-only**. It depends on Windows named pipes for IPC and on Autodesk desktop applications (Navisworks, Revit, Civil 3D), which are Windows products. macOS and Linux are not supported.
 
 ## 📄 License
 

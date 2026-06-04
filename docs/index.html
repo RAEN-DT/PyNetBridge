@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PyNet Platform Bridge — Privacy Policy</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+      color: #1b1b1f;
+      background: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #e6e6e6; background: #16161a; }
+      a { color: #8ab4f8; }
+      code { background: #2a2a31; }
+    }
+    h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+    h2 { font-size: 1.25rem; margin-top: 2rem; }
+    .updated { color: #6b6b72; font-size: .9rem; margin-top: 0; }
+    code { background: #f1f1f4; padding: .1rem .35rem; border-radius: 4px; font-size: .9em; }
+    footer { margin-top: 3rem; font-size: .85rem; color: #6b6b72; border-top: 1px solid #d0d0d5; padding-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>PyNet Platform Bridge — Privacy Policy</h1>
+  <p class="updated">Last updated: June 2026</p>
+
+  <p>
+    <strong>PyNet Platform Bridge</strong> ("the extension") is an MCP server developed by
+    RAEN Digital Tools that connects AI models with Autodesk desktop applications
+    (Navisworks, Revit, Civil 3D) on your local machine. This policy explains how the
+    extension handles data.
+  </p>
+
+  <h2>1. No data collection</h2>
+  <p>
+    The extension does <strong>not</strong> collect, store, sell, or transmit any personal
+    data, telemetry, usage analytics, or model data to RAEN Digital Tools or to any third
+    party. There are no tracking pixels, accounts, or external logging services.
+  </p>
+
+  <h2>2. Local-only processing</h2>
+  <p>
+    All communication happens locally on your computer over a Windows named pipe (IPC)
+    between the MCP server and the PyNet plugin running inside your Autodesk application.
+    Your scripts, model contents, and command results never leave your machine through the
+    extension.
+  </p>
+
+  <h2>3. Data handled by your AI client</h2>
+  <p>
+    The prompts you type and the tool results returned by the extension are processed by the
+    AI client you connect (for example, Claude Desktop). The handling of that data is governed
+    by the privacy policy of that AI client and its model provider, not by this extension.
+  </p>
+
+  <h2>4. Script validation</h2>
+  <p>
+    Before any AI-generated script is executed, it is statically analyzed locally by the
+    extension against an import/call whitelist. This validation runs entirely on your machine
+    and produces no external requests.
+  </p>
+
+  <h2>5. Children's privacy</h2>
+  <p>The extension is a professional engineering tool and is not directed to children.</p>
+
+  <h2>6. Changes to this policy</h2>
+  <p>
+    If this policy changes, the updated version will be published at this same URL with a new
+    "Last updated" date.
+  </p>
+
+  <h2>7. Contact</h2>
+  <p>
+    Questions about this policy: <a href="mailto:rafa2403nunez@gmail.com">rafa2403nunez@gmail.com</a><br />
+    Source code: <a href="https://github.com/rafa2403nunez-droid/PyNetBridge">github.com/rafa2403nunez-droid/PyNetBridge</a>
+  </p>
+
+  <footer>
+    © 2026 RAEN Digital Tools. All rights reserved.
+  </footer>
+</body>
+</html>
