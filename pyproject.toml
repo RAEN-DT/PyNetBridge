@@ -26,8 +26,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/rafa2403nunez-droid/PyNetBridge"
-Repository = "https://github.com/rafa2403nunez-droid/PyNetBridge"
+Homepage = "https://github.com/Rafael-NunezDeArenas/PyNetBridge"
+Repository = "https://github.com/Rafael-NunezDeArenas/PyNetBridge"
 
 [project.scripts]
 pynet-mcp-bridge = "pynet_mcp.server:main"

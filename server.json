@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.rafa2403nunez-droid/pynet-mcp-bridge",
+  "name": "io.github.Rafael-NunezDeArenas/pynet-mcp-bridge",
   "description": "MCP implementation to connect AI agents with the PyNet Platform for BIM/Engineering automation.",
   "repository": {
-    "url": "https://github.com/rafa2403nunez-droid/PyNetBridge",
+    "url": "https://github.com/Rafael-NunezDeArenas/PyNetBridge",
     "source": "github"
   },
   "version": "1.4.5",

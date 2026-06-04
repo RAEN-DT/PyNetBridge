@@ -7,11 +7,11 @@
   "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.",
   "author": {
     "name": "RAEN Digital Tools",
-    "url": "https://github.com/rafa2403nunez-droid"
+    "url": "https://github.com/Rafael-NunezDeArenas"
   },
-  "homepage": "https://github.com/rafa2403nunez-droid/PyNetBridge",
-  "documentation": "https://github.com/rafa2403nunez-droid/PyNetBridge#readme",
-  "support": "https://github.com/rafa2403nunez-droid/PyNetBridge/issues",
+  "homepage": "https://github.com/Rafael-NunezDeArenas/PyNetBridge",
+  "documentation": "https://github.com/Rafael-NunezDeArenas/PyNetBridge#readme",
+  "support": "https://github.com/Rafael-NunezDeArenas/PyNetBridge/issues",
   "icon": "Assets/icon-512.png",
   "license": "MIT",
   "keywords": ["mcp", "navisworks", "autodesk", "BIM", "pynet", "revit", "civil3d"],
