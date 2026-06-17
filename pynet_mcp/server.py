@@ -29,13 +29,14 @@ ALLOWED_REFERENCES = {
     # Revit
     "RevitAPI",
     "RevitAPIUI",
-    # AutoCAD / Civil 3D
+    # AutoCAD / Civil 3D / Map 3D
     "AcMgd",
     "AcCoreMgd",
     "AcDbMgd",
     "AecBaseMgd",
     "AecPropDataMgd",
     "AeccDbMgd",
+    "ManagedMapApi",   # Autodesk.Gis.Map (Map 3D) — used by 03_AutoCAD/20_GIS
 }
 
 ALLOWED_REFERENCE_PREFIXES = (
@@ -50,6 +51,13 @@ ALLOWED_PYTHON_IMPORTS = {
     "typing", "threading", "collections", "xml", "math",
     "pandas", "plotly", "matplotlib", "dash", "webbrowser",
     "psutil", "functools", "openpyxl",
+    # stdlib (safe)
+    "uuid", "zipfile", "io", "mimetypes", "difflib", "csv",
+    # third-party
+    "ifcopenshell",                 # IFC processing
+    "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
+    # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
+    "pynet_clash",
 }
 
 # Submodule-level whitelist: only http.server allowed (not http.client)
