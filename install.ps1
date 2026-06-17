@@ -1,8 +1,8 @@
 # PyNet Bridge - MCP Server Installer
 # Installs pynet-mcp-bridge and configures all detected AI clients:
-#   Claude Desktop, Claude Code (VS Code), Cline, Roo Code
+#   Claude Desktop, Claude Code (VS Code), Cline, Roo Code, Codex, GitHub Copilot
 
-function Add-McpServer($configPath, $createEmpty) {
+function Add-McpServer($configPath, $createEmpty, $rootKey = "mcpServers", $command = "pynet-bridge") {
     try {
         if (Test-Path $configPath) {
             $raw = [System.IO.File]::ReadAllText($configPath, [System.Text.Encoding]::UTF8)
@@ -12,16 +12,19 @@ function Add-McpServer($configPath, $createEmpty) {
             return $false
         }
 
-        $entryJson = '"pynet-bridge":{"type":"stdio","command":"pynet-bridge","args":[]}'
+        $cmd = $command -replace '\\', '/'
+        $entryJson = "`"pynet-bridge`":{`"type`":`"stdio`",`"command`":`"$cmd`",`"args`":[]}"
 
         if ($raw -match '"pynet-bridge"\s*:') {
             $raw = [regex]::Replace($raw, '"pynet-bridge"\s*:\s*\{[^{}]*\}', $entryJson)
-        } elseif ($raw -match '"mcpServers"\s*:\s*\{') {
-            $raw = [regex]::Replace($raw, '("mcpServers"\s*:\s*\{)', "`$1$entryJson,")
+        } elseif ($raw -match "`"$rootKey`"\s*:\s*\{") {
+            $raw = [regex]::Replace($raw, "(`"$rootKey`"\s*:\s*\{)", "`$1$entryJson,")
+        } elseif ($raw -match '^\s*\{\s*\}\s*$') {
+            $raw = "{`"$rootKey`":{$entryJson}}"
         } elseif ($raw -match '^\s*\{') {
-            $raw = [regex]::Replace($raw, '^\s*\{', "{`"mcpServers`":{$entryJson},")
+            $raw = [regex]::Replace($raw, '^\s*\{', "{`"$rootKey`":{$entryJson},")
         } else {
-            $raw = "{`"mcpServers`":{$entryJson}}"
+            $raw = "{`"$rootKey`":{$entryJson}}"
         }
 
         $configDir = Split-Path $configPath
@@ -179,6 +182,16 @@ if (-not (Test-Path $codexDir)) { New-Item -ItemType Directory -Path $codexDir |
 [System.IO.File]::WriteAllText($codexPath, $content, [System.Text.UTF8Encoding]::new($false))
 Write-Host "  [OK] Codex" -ForegroundColor Green
 $configured++
+
+# -- GitHub Copilot (VS Code) --
+# Copilot reads a dedicated user-level MCP file with the "servers" root key (not "mcpServers").
+$copilotPath = "$env:APPDATA\Code\User\mcp.json"
+if (Test-Path "$env:APPDATA\Code\User") {
+    $ok = Add-McpServer $copilotPath $true "servers" $bridgeCommand
+    if ($ok) { Write-Host "  [OK] GitHub Copilot" -ForegroundColor Green; $configured++ }
+} else {
+    Write-Host "  [--] GitHub Copilot: VS Code not found" -ForegroundColor DarkGray
+}
 
 # --- Done ---
 Write-Host ""
