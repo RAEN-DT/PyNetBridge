@@ -229,6 +229,15 @@ Once connected, the AI will have access to the full suite of PyNet tools:
 * **get_output_window_status**: Checks if the output window is currently available/visible.
 * **configure_output_window**: Toggles the visibility of the PyNet log/output window.
 
+### 🧊 BIM Viewer Control (VS Code)
+Drives the PyNet BIM Viewer open in VS Code. Reads clash data from the loaded `.pnt` package and controls the 3D view over a local (`127.0.0.1`) connection — nothing leaves your machine.
+* **viewer_status**: Reports whether a PyNet BIM Viewer is open (port, package, data dir).
+* **viewer_list_clashes**: Reads the loaded package's `clashes.json` and returns each clash with its `pnt_id` identifiers.
+* **viewer_load_package**: Loads a `.pnt` into the open viewer, pushes the models, and returns a summary.
+* **viewer_highlight_clash**: Highlights a clash pair by `pnt_id` (element A red, element B green).
+* **viewer_fit**: Fits the camera to all models in the viewer.
+* **viewer_clear**: Clears highlights and ghosting in the viewer.
+
 ---
 
 ## 💡 Usage Examples

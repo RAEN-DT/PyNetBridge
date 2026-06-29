@@ -3,6 +3,9 @@ import json
 import psutil
 import ast
 import threading
+import urllib.request
+import urllib.error
+from pathlib import Path
 from mcp.server.fastmcp import FastMCP, Context
 
 mcp = FastMCP("PyNet Platform Bridge")
@@ -481,6 +484,141 @@ def delete_script_button(pid: int, module_id: str, button_id: str) -> str:
         "Content": ""
     }
     return send_to_pipe(pid, payload, timeout=30.0)
+
+
+# ─── BIM Viewer control ───
+# Attaches to a PyNet BIM Viewer already open in VS Code (does not launch one). Discovery is via
+# the endpoint file the viewer's pnt_server publishes. Two planes:
+#   • DATA  — read the .pnt JSONs (clashes.json/…) from the endpoint's dataDir. The IFC carries
+#             only identifiers (pnt_id ≈ GlobalId), so all real info comes from these JSONs.
+#   • CONTROL — drive the viewer (highlight/fit/clear) via POST /api/control (fanned out over SSE).
+
+_VIEWER_ENDPOINT = Path.home() / ".pynet_viewer" / "endpoint.json"
+
+
+def _read_viewer_endpoint():
+    try:
+        if not _VIEWER_ENDPOINT.is_file():
+            return None
+        return json.loads(_VIEWER_ENDPOINT.read_text("utf-8"))
+    except Exception:
+        return None
+
+
+def _viewer_http(method: str, path: str, payload: dict = None, timeout: float = 8.0):
+    """Call the running viewer's HTTP API. Returns (json_or_dict, error_string)."""
+    ep = _read_viewer_endpoint()
+    if not ep or not ep.get("port"):
+        return None, "No viewer is running. Open the PyNet BIM Viewer in VS Code first."
+    url = f"http://127.0.0.1:{ep['port']}{path}"
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    req = urllib.request.Request(
+        url, data=data, method=method, headers={"Content-Type": "application/json"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            body = resp.read().decode("utf-8")
+            return (json.loads(body) if body else {}), None
+    except urllib.error.URLError as e:
+        return None, f"Viewer not reachable on port {ep['port']}: {e}"
+    except Exception as e:
+        return None, f"Viewer request failed: {e}"
+
+
+@mcp.tool(annotations={"title": "Viewer Status", "readOnlyHint": True})
+def viewer_status() -> str:
+    """Reports whether a PyNet BIM Viewer is open in VS Code (port, package, data dir)."""
+    ep = _read_viewer_endpoint()
+    if not ep:
+        return "No viewer is running. Open the PyNet BIM Viewer in VS Code."
+    _, err = _viewer_http("POST", "/api/control", {"action": "get_state"})
+    return json.dumps({
+        "running": err is None,
+        "port": ep.get("port"),
+        "package": ep.get("package"),
+        "dataDir": ep.get("dataDir"),
+        "error": err,
+    })
+
+
+@mcp.tool(annotations={"title": "Viewer List Clashes", "readOnlyHint": True})
+def viewer_list_clashes() -> str:
+    """Reads the loaded package's clashes.json — the data source, NOT the viewer/IFC.
+
+    Returns each clash with the pnt_id identifiers needed to highlight it."""
+    ep = _read_viewer_endpoint()
+    if not ep or not ep.get("dataDir"):
+        return "No package loaded. Open a .pnt in the viewer or use viewer_load_package."
+    f = Path(ep["dataDir"]) / "clashes.json"
+    if not f.is_file():
+        return f"clashes.json not found in {ep['dataDir']}"
+    data = json.loads(f.read_text("utf-8"))
+    clashes = data.get("clashes", [])
+    out = [{
+        "clash": c.get("Clash"), "test": c.get("Test"), "status": c.get("Status"),
+        "elementA": c.get("Element A"), "elementB": c.get("Element B"),
+        "pnt_id_a": c.get("pnt_id_a"), "pnt_id_b": c.get("pnt_id_b"),
+    } for c in clashes]
+    return json.dumps({"project": data.get("project"), "count": len(out), "clashes": out})
+
+
+@mcp.tool(annotations={"title": "Viewer Load Package", "destructiveHint": True})
+def viewer_load_package(pnt_path: str) -> str:
+    """Loads a .pnt into the open viewer and returns a summary read from clashes.json."""
+    res, err = _viewer_http("POST", "/api/load-pnt-path", {"path": pnt_path})
+    if err:
+        return err
+    if res.get("status") != "ok":
+        return f"Load failed: {res.get('message')}"
+    models = res.get("models", [])
+    # Push the models to the (already-open) viewer so they render.
+    for m in models:
+        name = m if isinstance(m, str) else m.get("fileName")
+        if name:
+            _viewer_http("POST", "/api/control",
+                         {"action": "load_model", "payload": {"url": f"/models/{name}", "name": name}})
+    # Data plane: summarise from the JSON, not the viewer.
+    summary = {"models": [m if isinstance(m, str) else m.get("fileName") for m in models]}
+    ep = _read_viewer_endpoint() or {}
+    if ep.get("dataDir"):
+        cf = Path(ep["dataDir"]) / "clashes.json"
+        if cf.is_file():
+            try:
+                data = json.loads(cf.read_text("utf-8"))
+                clashes = data.get("clashes", [])
+                summary["project"] = data.get("project")
+                summary["clashCount"] = len(clashes)
+                summary["tests"] = sorted({c.get("Test") for c in clashes if c.get("Test")})
+            except Exception:
+                pass
+    return json.dumps(summary)
+
+
+@mcp.tool(annotations={"title": "Viewer Highlight Clash", "destructiveHint": True})
+def viewer_highlight_clash(pnt_id_a: str = None, pnt_id_b: str = None) -> str:
+    """Highlights a clash pair in the open viewer by pnt_id (element A red, element B green)."""
+    res, err = _viewer_http("POST", "/api/control",
+                            {"action": "select", "payload": {"pnt_id_a": pnt_id_a, "pnt_id_b": pnt_id_b}})
+    if err:
+        return err
+    receivers = res.get("receivers", 0)
+    if not receivers:
+        return "Command sent, but no viewer is connected. Open/focus the viewer panel in VS Code."
+    return f"Highlighted clash in {receivers} viewer(s)."
+
+
+@mcp.tool(annotations={"title": "Viewer Fit", "readOnlyHint": True})
+def viewer_fit() -> str:
+    """Fits the camera to all models in the open viewer."""
+    res, err = _viewer_http("POST", "/api/control", {"action": "fit"})
+    return err or f"Fitted ({res.get('receivers', 0)} viewer(s))."
+
+
+@mcp.tool(annotations={"title": "Viewer Clear", "readOnlyHint": True})
+def viewer_clear() -> str:
+    """Clears highlights and ghosting in the open viewer."""
+    res, err = _viewer_http("POST", "/api/control", {"action": "clear"})
+    return err or f"Cleared ({res.get('receivers', 0)} viewer(s))."
 
 
 def main():

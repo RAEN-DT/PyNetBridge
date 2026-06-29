@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "pynet-mcp-bridge",
   "display_name": "PyNet Platform Bridge",
-  "version": "1.4.10",
+  "version": "1.5.0",
   "description": "Connects AI models with Autodesk desktop tools (Navisworks, Revit, Civil 3D) via the PyNet ecosystem for BIM/engineering automation.",
   "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.\n\nRequirements: Windows, Python 3.10-3.13, and the 'uv' package manager (https://docs.astral.sh/uv/) available on PATH — the server is launched via 'uvx pynet-mcp-bridge', which fetches the package from PyPI. Install uv with: winget install astral-sh.uv. Also requires the PyNet plugin installed in your Autodesk application.",
   "author": {
@@ -38,7 +38,13 @@
     { "name": "delete_pynet_module", "description": "Permanently deletes a module and all its contents." },
     { "name": "deploy_script_button", "description": "Installs a new ScriptButton into a specific module." },
     { "name": "update_script_button", "description": "Updates metadata for an existing ScriptButton or moves it to another module." },
-    { "name": "delete_script_button", "description": "Permanently removes a ScriptButton from a module by Id." }
+    { "name": "delete_script_button", "description": "Permanently removes a ScriptButton from a module by Id." },
+    { "name": "viewer_status", "description": "Reports whether a PyNet BIM Viewer is open in VS Code (port, package, data dir)." },
+    { "name": "viewer_list_clashes", "description": "Reads the loaded package's clashes.json and returns each clash with its pnt_id identifiers." },
+    { "name": "viewer_load_package", "description": "Loads a .pnt into the open BIM Viewer and returns a summary read from clashes.json." },
+    { "name": "viewer_highlight_clash", "description": "Highlights a clash pair in the open viewer by pnt_id (element A red, element B green)." },
+    { "name": "viewer_fit", "description": "Fits the camera to all models in the open BIM Viewer." },
+    { "name": "viewer_clear", "description": "Clears highlights and ghosting in the open BIM Viewer." }
   ],
   "compatibility": {
     "claude_desktop": ">=0.10.0",
