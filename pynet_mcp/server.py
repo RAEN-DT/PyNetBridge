@@ -621,6 +621,77 @@ def viewer_clear() -> str:
     return err or f"Cleared ({res.get('receivers', 0)} viewer(s))."
 
 
+@mcp.tool(annotations={"title": "Viewer Select", "destructiveHint": True})
+def viewer_select(pnt_ids: list[str] = None, pnt_ids_b: list[str] = None) -> str:
+    """Highlights a set of elements in the open viewer by pnt_id.
+
+    Pass a list of pnt_ids in `pnt_ids` (group A). Optionally pass a second list in
+    `pnt_ids_b` to highlight a second group in a distinct colour. Replaces any previous
+    selection. Use viewer_list_clashes / viewer_get_properties to obtain pnt_ids."""
+    if not pnt_ids and not pnt_ids_b:
+        return "Nothing to select: provide pnt_ids (and optionally pnt_ids_b)."
+    res, err = _viewer_http("POST", "/api/control",
+                            {"action": "select",
+                             "payload": {"pnt_id_a": pnt_ids or None, "pnt_id_b": pnt_ids_b or None}})
+    if err:
+        return err
+    receivers = res.get("receivers", 0)
+    if not receivers:
+        return "Command sent, but no viewer is connected. Open/focus the viewer panel in VS Code."
+    n = len(pnt_ids or []) + len(pnt_ids_b or [])
+    return f"Selected {n} element(s) in {receivers} viewer(s)."
+
+
+@mcp.tool(annotations={"title": "Viewer Isolate", "destructiveHint": True})
+def viewer_isolate(pnt_ids: list[str] = None) -> str:
+    """Isolates (hides everything except) the given pnt_ids in the open viewer.
+
+    Note: the command is broadcast, but the current viewer build ignores the 'isolate'
+    action (frontend handler pending). It will take effect once the viewer wires it."""
+    if not pnt_ids:
+        return "Nothing to isolate: provide pnt_ids."
+    res, err = _viewer_http("POST", "/api/control",
+                            {"action": "isolate", "payload": {"pnt_ids": pnt_ids}})
+    if err:
+        return err
+    return (f"Isolate command sent ({res.get('receivers', 0)} viewer(s)). "
+            "Note: the current viewer build may ignore 'isolate' until its frontend handler is wired.")
+
+
+@mcp.tool(annotations={"title": "Viewer Get State", "readOnlyHint": True})
+def viewer_get_state() -> str:
+    """Reads the viewer's last reported state (currently the list of loaded models)."""
+    res, err = _viewer_http("POST", "/api/control", {"action": "get_state"})
+    if err:
+        return err
+    return json.dumps(res.get("state", {}))
+
+
+@mcp.tool(annotations={"title": "Viewer Get Properties", "readOnlyHint": True})
+def viewer_get_properties(pnt_ids: list[str] = None) -> str:
+    """Reads element properties (name, model, psets) from the loaded package's properties.json.
+
+    Pass one or more pnt_ids to get their properties. Called with no pnt_ids, returns a
+    lightweight index (pnt_id → name, model) so you can discover what's available. The data
+    source is the .pnt's properties.json, NOT the viewer or IFC."""
+    ep = _read_viewer_endpoint()
+    if not ep or not ep.get("dataDir"):
+        return "No package loaded. Open a .pnt in the viewer or use viewer_load_package."
+    f = Path(ep["dataDir"]) / "properties.json"
+    if not f.is_file():
+        return f"properties.json not found in {ep['dataDir']}"
+    try:
+        props = json.loads(f.read_text("utf-8"))
+    except Exception as e:
+        return f"Failed to read properties.json: {e}"
+    if not pnt_ids:
+        index = [{"pnt_id": k, "name": v.get("name"), "model": v.get("model")}
+                 for k, v in props.items()]
+        return json.dumps({"count": len(index), "elements": index}, ensure_ascii=False)
+    out = {pid: props.get(pid, {"error": "pnt_id not found in properties.json"}) for pid in pnt_ids}
+    return json.dumps(out, ensure_ascii=False)
+
+
 def main():
     mcp.run()
 
