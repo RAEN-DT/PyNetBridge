@@ -58,6 +58,7 @@ ALLOWED_PYTHON_IMPORTS = {
     "uuid", "zipfile", "io", "mimetypes", "difflib", "csv",
     # third-party
     "ifcopenshell",                 # IFC processing
+    "numpy", "shapely",             # numerics + 2D computational geometry (generative design)
     "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
     # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
     "pynet_clash",
@@ -595,8 +596,11 @@ def viewer_load_package(pnt_path: str) -> str:
 
 
 @mcp.tool(annotations={"title": "Viewer Highlight Clash", "destructiveHint": True})
-def viewer_highlight_clash(pnt_id_a: str = None, pnt_id_b: str = None) -> str:
-    """Highlights a clash pair in the open viewer by pnt_id (element A red, element B green)."""
+def viewer_highlight_clash(pnt_id_a: str | list[str] = None, pnt_id_b: str | list[str] = None) -> str:
+    """Highlights a clash (element(s) A red, element(s) B green) and isolates the rest away.
+
+    Usually one pnt_id per side (a single clash pair), but either side accepts a list — e.g.
+    one element (A) against every counterpart it clashes with (B), all shown at once."""
     res, err = _viewer_http("POST", "/api/control",
                             {"action": "select", "payload": {"pnt_id_a": pnt_id_a, "pnt_id_b": pnt_id_b}})
     if err:
@@ -623,15 +627,18 @@ def viewer_clear() -> str:
 
 @mcp.tool(annotations={"title": "Viewer Select", "destructiveHint": True})
 def viewer_select(pnt_ids: list[str] = None, pnt_ids_b: list[str] = None) -> str:
-    """Highlights a set of elements in the open viewer by pnt_id.
+    """Highlights a set of elements in the open viewer by pnt_id, in neutral colours
+    (yellow / blue) with nothing else hidden — a plain "look at these" pointer.
 
     Pass a list of pnt_ids in `pnt_ids` (group A). Optionally pass a second list in
     `pnt_ids_b` to highlight a second group in a distinct colour. Replaces any previous
-    selection. Use viewer_list_clashes / viewer_get_properties to obtain pnt_ids."""
+    selection. Use viewer_list_clashes / viewer_get_properties to obtain pnt_ids.
+    For a clash pair (red/green, with the rest of the model isolated away), use
+    viewer_highlight_clash instead."""
     if not pnt_ids and not pnt_ids_b:
         return "Nothing to select: provide pnt_ids (and optionally pnt_ids_b)."
     res, err = _viewer_http("POST", "/api/control",
-                            {"action": "select",
+                            {"action": "select_ids",
                              "payload": {"pnt_id_a": pnt_ids or None, "pnt_id_b": pnt_ids_b or None}})
     if err:
         return err
@@ -644,23 +651,40 @@ def viewer_select(pnt_ids: list[str] = None, pnt_ids_b: list[str] = None) -> str
 
 @mcp.tool(annotations={"title": "Viewer Isolate", "destructiveHint": True})
 def viewer_isolate(pnt_ids: list[str] = None) -> str:
-    """Isolates (hides everything except) the given pnt_ids in the open viewer.
-
-    Note: the command is broadcast, but the current viewer build ignores the 'isolate'
-    action (frontend handler pending). It will take effect once the viewer wires it."""
+    """Isolates (hides everything except) the given pnt_ids in the open viewer."""
     if not pnt_ids:
         return "Nothing to isolate: provide pnt_ids."
     res, err = _viewer_http("POST", "/api/control",
                             {"action": "isolate", "payload": {"pnt_ids": pnt_ids}})
     if err:
         return err
-    return (f"Isolate command sent ({res.get('receivers', 0)} viewer(s)). "
-            "Note: the current viewer build may ignore 'isolate' until its frontend handler is wired.")
+    return f"Isolate command sent ({res.get('receivers', 0)} viewer(s))."
+
+
+@mcp.tool(annotations={"title": "Viewer Isolate Models", "destructiveHint": True})
+def viewer_isolate_models(models: list[str] = None) -> str:
+    """Shows only the given model(s)/discipline(s) (by exact name, e.g. "Snowdon Towers Sample
+    HVAC"), hiding every other loaded model. Cheaper than viewer_isolate for "just show me this
+    discipline" requests — no need to resolve every element's pnt_id first. Get the exact model
+    names from viewer_get_state's "models" list. Undo with viewer_clear."""
+    if not models:
+        return "Nothing to isolate: provide one or more model names (see viewer_get_state)."
+    res, err = _viewer_http("POST", "/api/control",
+                            {"action": "isolate_models", "payload": {"models": models}})
+    if err:
+        return err
+    receivers = res.get("receivers", 0)
+    if not receivers:
+        return "Command sent, but no viewer is connected. Open/focus the viewer panel in VS Code."
+    return f"Isolated {len(models)} model(s) in {receivers} viewer(s)."
 
 
 @mcp.tool(annotations={"title": "Viewer Get State", "readOnlyHint": True})
 def viewer_get_state() -> str:
-    """Reads the viewer's last reported state (currently the list of loaded models)."""
+    """Reads the viewer's last reported state: loaded models and the pnt_id of whatever the
+    user currently has selected (click in the 3D view or the tree panel — null if nothing is
+    selected). Use the returned pnt_id with viewer_get_properties for its details, or feed it
+    into a clashes.json lookup to find what it clashes with."""
     res, err = _viewer_http("POST", "/api/control", {"action": "get_state"})
     if err:
         return err
@@ -668,12 +692,25 @@ def viewer_get_state() -> str:
 
 
 @mcp.tool(annotations={"title": "Viewer Get Properties", "readOnlyHint": True})
-def viewer_get_properties(pnt_ids: list[str] = None) -> str:
+def viewer_get_properties(
+    pnt_ids: list[str] = None,
+    model: str = None,
+    search: str = None,
+    limit: int = 200,
+    offset: int = 0,
+) -> str:
     """Reads element properties (name, model, psets) from the loaded package's properties.json.
 
-    Pass one or more pnt_ids to get their properties. Called with no pnt_ids, returns a
-    lightweight index (pnt_id → name, model) so you can discover what's available. The data
-    source is the .pnt's properties.json, NOT the viewer or IFC."""
+    Pass one or more pnt_ids to get their full properties (including psets) directly.
+
+    Called with no pnt_ids, returns a paginated lightweight index (pnt_id, name, model) instead
+    of every element — narrow it with `model` (exact model/discipline name, e.g. "Snowdon Towers
+    Sample HVAC") and/or `search` (case-insensitive substring of the element name), and page
+    through with `limit`/`offset` (default 200 per page, capped at 500). On a federated model
+    the unfiltered index can have tens of thousands of entries — always pass `model` or `search`
+    when you can, and use `offset` to page through the rest.
+
+    The data source is the .pnt's properties.json, NOT the viewer or IFC."""
     ep = _read_viewer_endpoint()
     if not ep or not ep.get("dataDir"):
         return "No package loaded. Open a .pnt in the viewer or use viewer_load_package."
@@ -684,12 +721,32 @@ def viewer_get_properties(pnt_ids: list[str] = None) -> str:
         props = json.loads(f.read_text("utf-8"))
     except Exception as e:
         return f"Failed to read properties.json: {e}"
-    if not pnt_ids:
-        index = [{"pnt_id": k, "name": v.get("name"), "model": v.get("model")}
-                 for k, v in props.items()]
-        return json.dumps({"count": len(index), "elements": index}, ensure_ascii=False)
-    out = {pid: props.get(pid, {"error": "pnt_id not found in properties.json"}) for pid in pnt_ids}
-    return json.dumps(out, ensure_ascii=False)
+
+    if pnt_ids:
+        out = {pid: props.get(pid, {"error": "pnt_id not found in properties.json"}) for pid in pnt_ids}
+        return json.dumps(out, ensure_ascii=False)
+
+    search_l = search.lower() if search else None
+    matches = []
+    for k, v in props.items():
+        if k.startswith("__"):
+            continue
+        if model and v.get("model") != model:
+            continue
+        if search_l and search_l not in (v.get("name") or "").lower():
+            continue
+        matches.append({"pnt_id": k, "name": v.get("name"), "model": v.get("model")})
+
+    limit = max(1, min(limit, 500))
+    offset = max(0, offset)
+    page = matches[offset: offset + limit]
+    return json.dumps({
+        "total": len(matches),
+        "offset": offset,
+        "limit": limit,
+        "returned": len(page),
+        "elements": page,
+    }, ensure_ascii=False)
 
 
 def main():

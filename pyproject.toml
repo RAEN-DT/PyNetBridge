@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pynet-mcp-bridge"
-version = "1.5.1"
-description = "MCP server that connects AI models with Autodesk Navisworks via the PyNet ecosystem."
+version = "1.5.4"
+description = "MCP server that connects AI models with Autodesk Navisworks, Revit and Civil 3D via the PyNet ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
