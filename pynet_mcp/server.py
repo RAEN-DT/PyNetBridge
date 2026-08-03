@@ -61,7 +61,10 @@ ALLOWED_PYTHON_IMPORTS = {
     "numpy", "shapely",             # numerics + 2D computational geometry (generative design)
     "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
     # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
-    "pynet_clash",
+    # NOT third-party: these sit next to the script being run. CoordinationDashboard is imported
+    # by CoordinationWorkflow.py, which runs through send_command_by_path — so it has to pass the
+    # validator even though the dashboard process itself runs outside the bridge.
+    "pynet_clash", "CoordinationDashboard",
 }
 
 # Submodule-level whitelist: only http.server allowed (not http.client)
@@ -148,6 +151,10 @@ def check_calls(calls):
     return True, None
 
 def validate_script(script: str):
+    # Strip a UTF-8 BOM: ast.parse chokes on it ("invalid non-printable character U+FEFF") even
+    # though CPython runs the file fine. Editors on Windows add it silently, so saved scripts read
+    # back through send_command_by_path were being rejected for a reason that is not theirs.
+    script = script.lstrip("﻿")
     try:
         tree = ast.parse(script)
     except SyntaxError as e:
