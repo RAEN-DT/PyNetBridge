@@ -3,20 +3,13 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/pynet-mcp-bridge/"><img src="https://img.shields.io/pypi/v/pynet-mcp-bridge?label=pynet-mcp-bridge&color=2b7489" alt="PyPI"/></a>
+  <a href="https://github.com/RAEN-DT/PyNetBridge/releases"><img src="https://img.shields.io/github/v/release/RAEN-DT/PyNetBridge?label=release&color=f78166" alt="Release"/></a>
+  <a href="https://pypi.org/project/pynet-mcp-bridge/"><img src="https://img.shields.io/pypi/v/pynet-mcp-bridge?label=pypi&color=2b7489" alt="PyPI"/></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python"/>
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Windows"/>
   <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D-orange" alt="Hosts"/>
   <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2" alt="MCP"/>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
-</p>
-
-<p align="center">
-  <a href="https://github.com/RAEN-DT">Organization</a> &middot;
-  <a href="https://github.com/RAEN-DT/PyNet">Platform</a> &middot;
-  <a href="https://github.com/RAEN-DT/PyNetLibrary">Library</a> &middot;
-  <a href="https://github.com/RAEN-DT/PyNetVSCode">VS Code</a> &middot;
-  <a href="https://github.com/RAEN-DT/PyNet/wiki/PyNET-FAQs">FAQs</a>
 </p>
 
 #
