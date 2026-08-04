@@ -4,7 +4,7 @@
   "display_name": "PyNet Platform Bridge",
   "version": "1.5.1",
   "description": "Connects AI models with Autodesk desktop tools (Navisworks, Revit, Civil 3D) via the PyNet ecosystem for BIM/engineering automation.",
-  "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local IPC pipe to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.\n\nRequirements: Windows, Python 3.10-3.13, and the 'uv' package manager (https://docs.astral.sh/uv/) available on PATH — the server is launched via 'uvx pynet-mcp-bridge', which fetches the package from PyPI. Install uv with: winget install astral-sh.uv. Also requires the PyNet plugin installed in your Autodesk application.",
+  "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit and Civil 3D through a local connection to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.\n\nRequirements: Windows, Python 3.10 or higher, and the 'uv' package manager (https://docs.astral.sh/uv/) available on PATH — the server is launched via 'uvx pynet-mcp-bridge', which fetches the package from PyPI. Install uv with: winget install astral-sh.uv. Also requires the PyNet plugin installed in your Autodesk application.",
   "author": {
     "name": "RAEN Digital Tools",
     "url": "https://github.com/Rafael-NunezDeArenas"
@@ -26,7 +26,7 @@
   },
   "tools_generated": true,
   "tools": [
-    { "name": "list_active_instances", "description": "Scans the system for running Autodesk processes with an active PyNet IPC pipe." },
+    { "name": "list_active_instances", "description": "Scans the system for running Autodesk processes with an active PyNet connection." },
     { "name": "check_plugin_status", "description": "Handshake ping to verify the plugin listener is responsive." },
     { "name": "get_pynet_ui_layout", "description": "Fetches the full UI structure (ButtonsModules and ScriptButtons)." },
     { "name": "get_buttons_data", "description": "Lists all script buttons for a specific module ID." },
@@ -50,7 +50,7 @@
     "claude_desktop": ">=0.10.0",
     "platforms": ["win32"],
     "runtimes": {
-      "python": ">=3.10,<3.14"
+      "python": ">=3.10,<3.15"
     }
   }
 }

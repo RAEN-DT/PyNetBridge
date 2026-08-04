@@ -1,5 +1,22 @@
 <p align="center">
-  <img src="https://github.com/Rafael-NunezDeArenas/PyNetBridge/blob/main/Assets/PyNetBridge.png" width="400"/>
+  <img src="https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/Assets/PyNetBridge.png" width="400"/>
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/pynet-mcp-bridge/"><img src="https://img.shields.io/pypi/v/pynet-mcp-bridge?label=pynet-mcp-bridge&color=2b7489" alt="PyPI"/></a>
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python"/>
+  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Windows"/>
+  <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D-orange" alt="Hosts"/>
+  <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2" alt="MCP"/>
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
+</p>
+
+<p align="center">
+  <a href="https://github.com/RAEN-DT">Organization</a> &middot;
+  <a href="https://github.com/RAEN-DT/PyNet">Platform</a> &middot;
+  <a href="https://github.com/RAEN-DT/PyNetLibrary">Library</a> &middot;
+  <a href="https://github.com/RAEN-DT/PyNetVSCode">VS Code</a> &middot;
+  <a href="https://github.com/RAEN-DT/PyNet/wiki/PyNET-FAQs">FAQs</a>
 </p>
 
 #
@@ -48,7 +65,7 @@ This is what turns AI from a chatbot into an execution engine for BIM.
 * **AI → Action:** Turns AI-generated code into real actions inside Navisworks/Revit  
 * **Real-time Execution:** Run scripts instantly without leaving the BIM environment  
 * **Dynamic UI Creation:** Let AI create tools, buttons and workflows on the fly  
-* **Reliable Communication:** Fast and stable local IPC  
+* **Reliable Communication:** Fast and stable, entirely local  
 * **Model-Aware Automation:** Operates directly on live BIM models  
 
 ---
@@ -60,7 +77,7 @@ This is what turns AI from a chatbot into an execution engine for BIM.
 Open PowerShell and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/Rafael-NunezDeArenas/PyNetBridge/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/install.ps1 | iex
 ```
 
 This will automatically:
@@ -88,7 +105,7 @@ The `pynet-mcp-bridge` package includes:
 Install the recommended Python libraries for Navisworks, Revit and Civil 3D scripting with PyNET:
 
 ```powershell
-irm https://raw.githubusercontent.com/Rafael-NunezDeArenas/PyNetBridge/main/install-libraries.ps1 | iex
+irm https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/install-libraries.ps1 | iex
 ```
 
 This installs:
@@ -103,8 +120,7 @@ This installs:
 
 ### Prerequisites
 * **PyNet Platform** plugin installed in Navisworks/Revit.
-* Python 3.10 or higher → [python.org](https://www.python.org/downloads/)
-  > ⚠️ **Python 3.14 is not yet supported.** The `pythonnet` runtime currently supports Python 3.7 through 3.13. If you encounter a `System.NotSupportedException` mentioning an unsupported ABI version, install Python 3.12 or 3.13 and configure PyNet to use it.
+* Python 3.10 or higher → [python.org](https://www.python.org/downloads/) — **Python 3.14 is supported.**
 * **uv** → [docs.astral.sh/uv](https://docs.astral.sh/uv/) — **required.** The Claude Desktop extension (`.mcpb`) launches the server with `uvx pynet-mcp-bridge`, so `uv` must be installed and on your `PATH`. Install it with `winget install astral-sh.uv`. Without `uv`, the extension will fail to start.
 * **Git** → [git-scm.com](https://git-scm.com/downloads) — required for VS Code extensions (Claude Code, Cline, Roo Code) to function correctly.
 * For Cline / Roo Code: **VS Code** → [code.visualstudio.com](https://code.visualstudio.com/)
@@ -328,7 +344,7 @@ Install the bridge, connect your AI client, and turn natural language into real 
 
 Have questions about installation, configuration, or usage? Check the full FAQ page:
 
-👉 [PyNet FAQs](https://github.com/Rafael-NunezDeArenas/PyNet/wiki/PyNET-FAQs)
+👉 [PyNet FAQs](https://github.com/RAEN-DT/PyNet/wiki/PyNET-FAQs)
 
 ---
 
@@ -347,9 +363,9 @@ Natural Language → AI → Python Script → PyNet → Autodesk → BIM Action
 
 | Component | Repository | Purpose |
 | :--- | :--- | :--- |
-| **PyNet Platform** | [PyNet](https://github.com/Rafael-NunezDeArenas/PyNet) | Navisworks, Revit & Civil 3D plugin — hosts the Python.NET engine |
+| **PyNet Platform** | [PyNet](https://github.com/RAEN-DT/PyNet) | Navisworks, Revit & Civil 3D plugin — hosts the Python.NET engine |
 | **PyNet Bridge (MCP)** | This repo | MCP server - connects AI models to PyNET with including secure scripts validation|
-| **PyNet Library** | [PyNetLibrary](https://github.com/Rafael-NunezDeArenas/PyNetLibrary) | Script reference library and AI context |
+| **PyNet Library** | [PyNetLibrary](https://github.com/RAEN-DT/PyNetLibrary) | Script reference library and AI context |
 
 
 ## 🔒 Privacy Policy
@@ -357,20 +373,20 @@ Natural Language → AI → Python Script → PyNet → Autodesk → BIM Action
 PyNet Bridge runs **entirely on your local machine**. It does **not** collect, store, or transmit any personal data, telemetry, or analytics.
 
 * **No data collection:** The server does not send any information to RAEN Digital Tools or any third party.
-* **Local-only communication:** All communication happens over a local Windows named pipe (IPC) between the MCP server and the PyNet plugin running inside Autodesk. Nothing leaves your computer.
+* **Local-only communication:** All communication between the MCP server and the PyNet plugin running inside Autodesk stays on your machine. No network sockets, no remote endpoints — nothing leaves your computer.
 * **Your scripts and model data** stay on your machine and are only processed by the AI client you have connected.
 
 Full privacy policy: **https://privacy.raendt.com/**
 
 ## 🆘 Support
 
-* **Issues / bug reports:** [GitHub Issues](https://github.com/Rafael-NunezDeArenas/PyNetBridge/issues)
-* **FAQ:** [PyNet FAQs](https://github.com/Rafael-NunezDeArenas/PyNet/wiki/PyNET-FAQs)
+* **Issues / bug reports:** [GitHub Issues](https://github.com/RAEN-DT/PyNetBridge/issues)
+* **FAQ:** [PyNet FAQs](https://github.com/RAEN-DT/PyNet/wiki/PyNET-FAQs)
 * **Contact:** info@raendt.com
 
 ## 🖥️ Platform Support
 
-PyNet Bridge is **Windows-only**. It depends on Windows named pipes for IPC and on Autodesk desktop applications (Navisworks, Revit, Civil 3D), which are Windows products. macOS and Linux are not supported.
+PyNet Bridge is **Windows-only**. It relies on Windows-specific local communication facilities and on Autodesk desktop applications (Navisworks, Revit, Civil 3D), which are Windows products. macOS and Linux are not supported.
 
 ## 📄 License
 
@@ -380,9 +396,8 @@ This project is licensed under the MIT License.
 
 mcp-name: io.github.Rafael-NunezDeArenas/pynet-mcp-bridge
 
-© 2026 RAEN Digital Tools. Todos los derechos reservados.
-Obra inscrita en el Registro de la Propiedad Intelectual de la Comunidad de Madrid.
-
 <p align="center">
-  <img src="https://github.com/Rafael-NunezDeArenas/PyNetBridge/blob/main/Assets/RAENDigitalTools.png" alt="RAEN Digital Tools" width="200">
+  <img src="https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/Assets/RAENDigitalTools.png" alt="RAEN Digital Tools" width="180"><br/><br/>
+  <sub>© 2026 RAEN Digital Tools · Todos los derechos reservados.<br/>
+  Obra inscrita en el Registro de la Propiedad Intelectual de la Comunidad de Madrid.</sub>
 </p>
