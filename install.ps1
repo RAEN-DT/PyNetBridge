@@ -45,30 +45,30 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # --- Step 1: Check Python >= 3.10 ---
+# uv can provide its own interpreter, so a missing/old system Python is not fatal: we just ask uv
+# to build the tool environment on a managed Python instead.
 Write-Host "Checking Python installation..." -ForegroundColor Yellow
-if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: Python not found. Install Python 3.10+ from https://python.org and try again." -ForegroundColor Red
-    Read-Host "Press Enter to exit"
-    exit 1
-}
-
-$pythonVersion = python --version
-Write-Host "Found: $pythonVersion" -ForegroundColor Green
-
-$versionMatch = [regex]::Match($pythonVersion, '(\d+)\.(\d+)')
-if ($versionMatch.Success) {
-    $major = [int]$versionMatch.Groups[1].Value
-    $minor = [int]$versionMatch.Groups[2].Value
-    if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 10)) {
-        Write-Host "ERROR: Python 3.10+ is required but found $major.$minor. Please upgrade." -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit 1
+$uvPythonArgs = @()
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    $pythonVersion = python --version
+    Write-Host "Found: $pythonVersion" -ForegroundColor Green
+    $versionMatch = [regex]::Match($pythonVersion, '(\d+)\.(\d+)')
+    if ($versionMatch.Success) {
+        $major = [int]$versionMatch.Groups[1].Value
+        $minor = [int]$versionMatch.Groups[2].Value
+        if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 10)) {
+            Write-Host "Python $major.$minor is older than 3.10 - uv will use its own Python 3.12." -ForegroundColor DarkYellow
+            $uvPythonArgs = @("--python", "3.12")
+        }
     }
 } else {
-    Write-Host "WARNING: Could not determine Python version. Proceeding anyway..." -ForegroundColor DarkYellow
+    Write-Host "Python not found - uv will use its own Python 3.12." -ForegroundColor DarkYellow
+    $uvPythonArgs = @("--python", "3.12")
 }
 
 # --- Step 2: Ensure uv is installed ---
+# uv is the only supported installer. A pip install lands in a different interpreter from the
+# pynet-bridge launcher and silently drifts from it, so there is deliberately no pip fallback.
 Write-Host ""
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
     Write-Host "uv not found. Installing uv..." -ForegroundColor Yellow
@@ -76,20 +76,20 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
         Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "User") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "Machine")
     } catch {
-        Write-Host "WARNING: Could not install uv automatically. Falling back to pip." -ForegroundColor DarkYellow
+        Write-Host "  uv installer error: $($_.Exception.Message)" -ForegroundColor DarkYellow
     }
+}
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    Write-Host "ERROR: uv could not be installed. Install it with 'winget install astral-sh.uv' and run this installer again." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
 }
 
 # --- Step 3: Install package ---
-$hasUv = [bool](Get-Command uv -ErrorAction SilentlyContinue)
-
-if ($hasUv) {
-    Write-Host "Installing pynet-mcp-bridge via uv..." -ForegroundColor Yellow
-    uv tool install pynet-mcp-bridge --upgrade --quiet
-} else {
-    Write-Host "Installing pynet-mcp-bridge via pip..." -ForegroundColor DarkYellow
-    pip install pynet-mcp-bridge --upgrade --quiet
-}
+# Stop running bridges first: a live process locks pynet-bridge.exe and leaves a half-built tool env.
+Get-Process pynet-bridge, pynet-mcp-bridge -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Write-Host "Installing pynet-mcp-bridge via uv..." -ForegroundColor Yellow
+uv tool install pynet-mcp-bridge --upgrade --quiet @uvPythonArgs
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Installation failed. Check your internet connection and try again." -ForegroundColor Red
@@ -102,6 +102,10 @@ Write-Host "Package installed successfully." -ForegroundColor Green
 Write-Host ""
 Write-Host "Resolving pynet-bridge executable..." -ForegroundColor Yellow
 $bridgeCommand = (Get-Command pynet-bridge -ErrorAction SilentlyContinue).Source
+# A first uv install puts its bin folder on the user PATH only for new sessions.
+if (-not $bridgeCommand -and (Test-Path "$env:USERPROFILE\.local\bin\pynet-bridge.exe")) {
+    $bridgeCommand = "$env:USERPROFILE\.local\bin\pynet-bridge.exe"
+}
 
 if (-not $bridgeCommand) {
     Write-Host "ERROR: pynet-bridge was installed but not found." -ForegroundColor Red

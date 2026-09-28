@@ -110,7 +110,11 @@ class ScriptAnalyzer(ast.NodeVisitor):
                 if isinstance(node.func.value, ast.Name) and node.func.value.id == "clr":
                     if node.args and isinstance(node.args[0], ast.Constant):
                         self.clr_references.append(node.args[0].value)
-            self.calls.append(node.func.attr)
+            # BLOCKED_CALLS names builtins, so a method only counts when it is reached through the
+            # builtins module itself (builtins.eval). Matching every method name rejected harmless
+            # calls such as re.compile(...) as if they were the compile() builtin.
+            if isinstance(node.func.value, ast.Name) and node.func.value.id in ("builtins", "__builtins__"):
+                self.calls.append(node.func.attr)
         elif isinstance(node.func, ast.Name):
             self.calls.append(node.func.id)
         self.generic_visit(node)
