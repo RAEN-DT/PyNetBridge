@@ -60,6 +60,8 @@ ALLOWED_PYTHON_IMPORTS = {
     "ifcopenshell",                 # IFC processing
     "numpy", "shapely",             # numerics + 2D computational geometry (generative design)
     "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
+    "pypdf",                        # PDF reading (docs/pdf-mcp.md)
+    "docx",                         # python-docx — Word reading/writing (docs/word-mcp.md)
     # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
     # NOT third-party: these sit next to the script being run. CoordinationDashboard is imported
     # by CoordinationWorkflow.py, which runs through send_command_by_path — so it has to pass the

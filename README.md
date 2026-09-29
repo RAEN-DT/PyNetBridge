@@ -292,7 +292,7 @@ Only these .NET references are permitted via `clr.AddReference`:
 - **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`)
 
 ### Allowed Python Imports
-`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`
+`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`, `openpyxl`, `uuid`, `zipfile`, `io`, `mimetypes`, `difflib`, `csv`, `ifcopenshell`, `numpy`, `shapely`, `qgis`, `processing`, `pypdf`, `docx`
 
 ### Allowed Python Submodules
 Some modules are allowed at the submodule level only, preventing access to dangerous siblings:
