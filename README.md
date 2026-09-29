@@ -75,7 +75,7 @@ irm https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/install.ps1 | iex
 
 This will automatically:
 1. Check Python 3.10+ is installed
-2. Install `pynet-mcp-bridge` from PyPI (via `uv` or `pip`)
+2. Install `uv` if missing, then `pynet-mcp-bridge` from PyPI with `uv` (never `pip`)
 3. Auto-detect and configure all installed AI clients:
    - **Claude Desktop** (standard and Microsoft Store versions)
    - **Claude Code** (VS Code extension / CLI)
@@ -87,8 +87,7 @@ The `pynet-mcp-bridge` package includes:
 | Package | Purpose |
 | :--- | :--- |
 | **pynet-mcp-bridge** | MCP server that connects AI models with Autodesk tools via PyNET |
-| **mcp[cli]** | Model Context Protocol SDK and CLI tools |
-| **fastmcp** | High-level MCP server framework |
+| **mcp[cli]** (1.x) | Model Context Protocol SDK and CLI tools |
 | **psutil** | System process detection (finds running Autodesk instances) |
 
 > Restart your AI client(s) after installation to apply changes.
@@ -128,11 +127,8 @@ This installs:
 uv tool install pynet-mcp-bridge
 ```
 
-Or with pip:
-
-```bash
-pip install pynet-mcp-bridge
-```
+Use **uv only** — do not install with `pip`. A pip copy lands in a different interpreter from the
+`pynet-bridge` launcher, so upgrades and fixes silently miss the environment that actually runs.
 
 **2. Configure Claude Desktop:**
 
@@ -296,7 +292,7 @@ Only these .NET references are permitted via `clr.AddReference`:
 - **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`)
 
 ### Allowed Python Imports
-`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`
+`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`, `openpyxl`, `uuid`, `zipfile`, `io`, `mimetypes`, `difflib`, `csv`, `ifcopenshell`, `numpy`, `shapely`, `qgis`, `processing`, `pypdf`, `docx`
 
 ### Allowed Python Submodules
 Some modules are allowed at the submodule level only, preventing access to dangerous siblings:
