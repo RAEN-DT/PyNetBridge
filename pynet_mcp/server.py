@@ -82,6 +82,8 @@ ALLOWED_PYTHON_IMPORTS = {
     "numpy", "shapely",             # numerics + 2D computational geometry (generative design)
     "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
     "pypdf",                        # PDF reading (docs/pdf-mcp.md)
+    # Rhino: shipped with Rhino's own script runtime, not pip packages
+    "rhinoscriptsyntax", "scriptcontext",
     "docx",                         # python-docx — Word reading/writing (docs/word-mcp.md)
     # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
     # NOT third-party: these sit next to the script being run. CoordinationDashboard is imported
