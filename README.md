@@ -7,20 +7,20 @@
   <a href="https://pypi.org/project/pynet-mcp-bridge/"><img src="https://img.shields.io/pypi/v/pynet-mcp-bridge?label=pypi&color=2b7489" alt="PyPI"/></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python"/>
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Windows"/>
-  <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D-orange" alt="Hosts"/>
+  <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D%20%C2%B7%20Rhino%20%C2%B7%20Tekla-orange" alt="Hosts"/>
   <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2" alt="MCP"/>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
 </p>
 
 #
 
-**PyNet Bridge** is the execution layer that allows AI models to control Autodesk tools in real-time.
+**PyNet Bridge** is the execution layer that allows AI models to control desktop BIM tools in real-time.
 
-It connects Natural Language → Python → Autodesk desktop tools (Navisworks, Revit, AutoCAD), enabling AI to generate, execute, and refine BIM workflows autonomously.
+It connects Natural Language → Python → desktop BIM tools (Navisworks, Revit, AutoCAD, Rhino, Tekla Structures), enabling AI to generate, execute, and refine BIM workflows autonomously.
 
-Available integrations include **Navisworks Manage**, **Revit**, and **Civil 3D**.
+Available integrations include **Navisworks Manage**, **Revit**, **Civil 3D**, **Rhino** and **Tekla Structures** (2023–2026).
 
-This bridge acts as the connective tissue between AI logic and Autodesk desktop APIs, allowing for dynamic UI creation, script execution, and BIM process automation using natural language.
+This bridge acts as the connective tissue between AI logic and the desktop APIs of those hosts, allowing for dynamic UI creation, script execution, and BIM process automation using natural language.
 
 
 ## 🎬 Demos & Tutorials
@@ -94,7 +94,7 @@ The `pynet-mcp-bridge` package includes:
 
 ### 📦 Python Libraries Starter Pack (optional)
 
-Install the recommended Python libraries for Navisworks, Revit and Civil 3D scripting with PyNET:
+Install the recommended Python libraries for PyNET scripting:
 
 ```powershell
 irm https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/install-libraries.ps1 | iex
@@ -281,18 +281,20 @@ PyNet Bridge includes a built-in validation layer that ensures all AI-generated 
 
 **AI remains powerful**, but within safe boundaries
 
-Starting from **v1.1.1**, the MCP server includes a built-in static analyzer that validates every script before it reaches the Autodesk host. All scripts are parsed and inspected at the bridge level — **rejected scripts never leave the MCP server**.
+Starting from **v1.1.1**, the MCP server includes a built-in static analyzer that validates every script before it reaches the host application. All scripts are parsed and inspected at the bridge level — **rejected scripts never leave the MCP server**.
 
 ### Allowed CLR Assemblies
 Only these .NET references are permitted via `clr.AddReference`:
 - **Common:** `System`, `System.Windows.Forms`, `System.Drawing`, `System.Collections.Generic`
 - **Navisworks:** `Autodesk.Navisworks.Api`, `.ComApi`, `.Interop.ComApi`, `.Clash`
 - **Revit:** `RevitAPI`, `RevitAPIUI`
-- **AutoCAD / Civil 3D:** `AcMgd`, `AcCoreMgd`, `AcDbMgd`, `AecBaseMgd`, `AecPropDataMgd`, `AeccDbMgd`
-- **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`)
+- **AutoCAD / Civil 3D / Map 3D:** `AcMgd`, `AcCoreMgd`, `AcDbMgd`, `AecBaseMgd`, `AecPropDataMgd`, `AeccDbMgd`, `ManagedMapApi`
+- **Rhino:** `RhinoCommon`, `Rhino.UI`, `Eto`
+- **Tekla Structures:** `Tekla.Structures`, `.Model`, `.Drawing`, `.Datatype`, `.Dialog`, `.Catalogs`, `.Plugins`
+- **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`, `Raen.Rhino.Pynet.8`, `Raen.Tekla.Pynet.2026`)
 
 ### Allowed Python Imports
-`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`, `openpyxl`, `uuid`, `zipfile`, `io`, `mimetypes`, `difflib`, `csv`, `ifcopenshell`, `numpy`, `shapely`, `qgis`, `processing`, `pypdf`, `docx`
+`clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`, `openpyxl`, `uuid`, `zipfile`, `io`, `mimetypes`, `difflib`, `csv`, `ifcopenshell`, `numpy`, `shapely`, `qgis`, `processing`, `pypdf`, `docx`, `rhinoscriptsyntax`, `scriptcontext`
 
 ### Allowed Python Submodules
 Some modules are allowed at the submodule level only, preventing access to dangerous siblings:
@@ -339,20 +341,20 @@ Have questions about installation, configuration, or usage? Check the full FAQ p
 
 ## 🔗 How This MCP Fits Into the Ecosystem
 
-This MCP is part of a modular system designed to enable AI-driven BIM automation across Autodesk tools.
+This MCP is part of a modular system designed to enable AI-driven BIM automation across desktop BIM tools.
 
 This repository is designed to work alongside:
 
-- PyNet Platform → Executes scripts inside Navisworks, Revit & Civil 3D via Python.NET  
+- PyNet Platform → Executes scripts inside Navisworks, Revit, Civil 3D, Rhino & Tekla Structures via Python.NET  
 - PyNet Library → Gives the AI context with a Python scripts library 
 
 Together, these components enable:
 
-Natural Language → AI → Python Script → PyNet → Autodesk → BIM Action
+Natural Language → AI → Python Script → PyNet → Host application → BIM Action
 
 | Component | Repository | Purpose |
 | :--- | :--- | :--- |
-| **PyNet Platform** | [PyNet](https://github.com/RAEN-DT/PyNet) | Navisworks, Revit & Civil 3D plugin — hosts the Python.NET engine |
+| **PyNet Platform** | [PyNet](https://github.com/RAEN-DT/PyNet) | Navisworks, Revit, Civil 3D, Rhino & Tekla Structures plugin — hosts the Python.NET engine |
 | **PyNet Bridge (MCP)** | This repo | MCP server - connects AI models to PyNET with including secure scripts validation|
 | **PyNet Library** | [PyNetLibrary](https://github.com/RAEN-DT/PyNetLibrary) | Script reference library and AI context |
 
@@ -375,7 +377,7 @@ Full privacy policy: **https://privacy.raendt.com/**
 
 ## 🖥️ Platform Support
 
-PyNet Bridge is **Windows-only**. It relies on Windows-specific local communication facilities and on Autodesk desktop applications (Navisworks, Revit, Civil 3D), which are Windows products. macOS and Linux are not supported.
+PyNet Bridge is **Windows-only**. It relies on Windows-specific local communication facilities and on desktop BIM applications (Navisworks, Revit, Civil 3D, Rhino, Tekla Structures), which are Windows products. macOS and Linux are not supported.
 
 ## 📄 License
 

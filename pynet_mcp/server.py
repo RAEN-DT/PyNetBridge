@@ -16,6 +16,13 @@ SUPPORTED_PRODUCTS = {
     "roamer.exe":  "Navisworks",
     "revit.exe":   "Revit",
     "acad.exe":    "AutoCAD",
+    "rhino.exe":   "Rhino",
+    # Tekla has no in-process add-ins: PyNET runs in its own exe (one per Tekla version) that
+    # connects to TeklaStructures.exe, so the IPC pipe belongs to that exe, not to Tekla.
+    "raen.tekla.pynet.2023.exe": "Tekla Structures 2023",
+    "raen.tekla.pynet.2024.exe": "Tekla Structures 2024",
+    "raen.tekla.pynet.2025.exe": "Tekla Structures 2025",
+    "raen.tekla.pynet.2026.exe": "Tekla Structures 2026",
 }
 
 ALLOWED_REFERENCES = {
@@ -40,6 +47,18 @@ ALLOWED_REFERENCES = {
     "AecPropDataMgd",
     "AeccDbMgd",
     "ManagedMapApi",   # Autodesk.Gis.Map (Map 3D) — used by 03_AutoCAD/20_GIS
+    # Rhino
+    "RhinoCommon",
+    "Rhino.UI",        # also puts "Rhino" in ALLOWED_CLR_ROOTS, so `import Rhino` passes
+    "Eto",
+    # Tekla Structures Open API (also puts "Tekla" in ALLOWED_CLR_ROOTS, so `import Tekla` passes)
+    "Tekla.Structures",
+    "Tekla.Structures.Model",
+    "Tekla.Structures.Drawing",
+    "Tekla.Structures.Datatype",
+    "Tekla.Structures.Dialog",
+    "Tekla.Structures.Catalogs",  # profile / material / bolt catalogs
+    "Tekla.Structures.Plugins",
 }
 
 ALLOWED_REFERENCE_PREFIXES = (
@@ -47,6 +66,8 @@ ALLOWED_REFERENCE_PREFIXES = (
     "Raen.Navisworks.Pynet.",
     "Raen.Revit.Pynet.",
     "Raen.Civil3D.Pynet.",
+    "Raen.Rhino.Pynet.",
+    "Raen.Tekla.Pynet.",
 )
 
 ALLOWED_PYTHON_IMPORTS = {
@@ -61,6 +82,8 @@ ALLOWED_PYTHON_IMPORTS = {
     "numpy", "shapely",             # numerics + 2D computational geometry (generative design)
     "qgis", "processing",           # PyQGIS + QGIS Processing (GIS workflows)
     "pypdf",                        # PDF reading (docs/pdf-mcp.md)
+    # Rhino: shipped with Rhino's own script runtime, not pip packages
+    "rhinoscriptsyntax", "scriptcontext",
     "docx",                         # python-docx — Word reading/writing (docs/word-mcp.md)
     # project-local shared modules (deployed under .../Pynet/Library/01_Scripts)
     # NOT third-party: these sit next to the script being run. CoordinationDashboard is imported
@@ -276,7 +299,7 @@ async def _send_with_heartbeat(pid: int, payload: dict, timeout: float, ctx: Con
 
 @mcp.tool(annotations={"title": "List Active Instances", "readOnlyHint": True})
 def list_active_instances() -> str:
-    """Scans the system for running Autodesk processes with an active PyNet IPC pipe."""
+    """Scans the system for running host processes (Autodesk, Rhino, PyNET for Tekla) with an active PyNet IPC pipe."""
     instances = []
     for proc in psutil.process_iter(['pid', 'name']):
         try:
