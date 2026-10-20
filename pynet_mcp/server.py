@@ -23,6 +23,9 @@ SUPPORTED_PRODUCTS = {
     "raen.tekla.pynet.2024.exe": "Tekla Structures 2024",
     "raen.tekla.pynet.2025.exe": "Tekla Structures 2025",
     "raen.tekla.pynet.2026.exe": "Tekla Structures 2026",
+    # Presto (RIB) is the same model: one exe for every Presto version, driving Presto.exe via COM
+    # (scripts use the __presto__ scope variable, so no extra CLR references are needed).
+    "raen.presto.pynet.exe": "Presto",
 }
 
 ALLOWED_REFERENCES = {
@@ -68,6 +71,7 @@ ALLOWED_REFERENCE_PREFIXES = (
     "Raen.Civil3D.Pynet.",
     "Raen.Rhino.Pynet.",
     "Raen.Tekla.Pynet.",
+    "Raen.Presto.Pynet.",
 )
 
 ALLOWED_PYTHON_IMPORTS = {
@@ -299,7 +303,7 @@ async def _send_with_heartbeat(pid: int, payload: dict, timeout: float, ctx: Con
 
 @mcp.tool(annotations={"title": "List Active Instances", "readOnlyHint": True})
 def list_active_instances() -> str:
-    """Scans the system for running host processes (Autodesk, Rhino, PyNET for Tekla) with an active PyNet IPC pipe."""
+    """Scans the system for running host processes (Autodesk, Rhino, PyNET for Tekla/Presto) with an active PyNet IPC pipe."""
     instances = []
     for proc in psutil.process_iter(['pid', 'name']):
         try:
