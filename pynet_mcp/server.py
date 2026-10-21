@@ -62,6 +62,9 @@ ALLOWED_REFERENCES = {
     "Tekla.Structures.Dialog",
     "Tekla.Structures.Catalogs",  # profile / material / bolt catalogs
     "Tekla.Structures.Plugins",
+    # RIB Presto: the host exe has no version suffix (AssemblyName Raen.Presto.Pynet), so
+    # the "Raen.Presto.Pynet." prefix below never matches its exact name. Listed here too.
+    "Raen.Presto.Pynet",
 }
 
 ALLOWED_REFERENCE_PREFIXES = (
