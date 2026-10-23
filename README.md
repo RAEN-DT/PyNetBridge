@@ -386,7 +386,7 @@ This project is licensed under the MIT License.
 
 ---
 
-mcp-name: io.github.Rafael-NunezDeArenas/pynet-mcp-bridge
+mcp-name: io.github.RAEN-DT/pynet-mcp-bridge
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/RAEN-DT/PyNetBridge/main/Assets/RAENDigitalTools.png" alt="RAEN Digital Tools" width="180"><br/><br/>
