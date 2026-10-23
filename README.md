@@ -25,28 +25,18 @@ This bridge acts as the connective tissue between AI logic and the desktop APIs 
 
 ## 🎬 Demos & Tutorials
 
-See PyNet Bridge in action — these recordings show the full natural-language → BIM-action workflow inside live Autodesk models.
+See PyNet Bridge in action — the full natural-language → BIM-action workflow inside a live model.
 
 | Demo | Description | Video |
 | :--- | :--- | :--- |
-| **⭐ Autonomous BIM Coordination (Revit + Navisworks)** | Claude Code drives **Revit and Navisworks simultaneously** to audit models, resolve clashes by tolerance rules, generate geometry, and self-correct API errors in real time. | [🎬 Watch here](https://www.youtube.com/watch?v=Vw7ig8TItng) |
-| **PyNET + Codex Integration** | How to configure PyNet Bridge with Codex and query into Navisworks. | [🎬 Watch here](https://youtu.be/HdmbCO_pTN0) |
-
-### ⭐ Featured: Autonomous BIM Coordination
-
-In [this technical demo](https://www.youtube.com/watch?v=Vw7ig8TItng), Claude Code connects to **Navisworks and Revit at the same time** to run a full coordination workflow end-to-end:
-
-* **Engineering criteria as a Skill** — the AI applies tolerance rules to decide which interferences to auto-approve.
-* **Real-time data auditing** — validates model integrity and detects missing parameters (`PYNET_Classification`) before coordinating.
-* **Autonomous geometry generation** — generates architectural sleeves (*pasatubos*) directly in Revit, with precise spatial rotation to match pipe angles.
-* **Self-healing code** — hits a live Revit API data-type exception, analyzes the failure, rewrites the script on the fly, and completes the task.
+| **Generative design of retail warehouses (Revit)** | The AI generates the layout of a retail warehouse in Revit from a natural-language brief, driving the Revit API through PyNet Bridge. | [🎬 Watch here](https://www.youtube.com/watch?v=rQJNZyFTdOI) |
 
 ## 🔄 How it works
 
 1. The user describes a task in natural language.  
 2. The AI generates a Python script.
 3. PyNet Bridge validates and sends the script.
-4. The PyNet plugin executes it inside Autodesk.
+4. The PyNet plugin executes it inside the host application.
 5. Results are returned back to the AI.
 
 This is what turns AI from a chatbot into an execution engine for BIM.
@@ -86,7 +76,7 @@ This will automatically:
 The `pynet-mcp-bridge` package includes:
 | Package | Purpose |
 | :--- | :--- |
-| **pynet-mcp-bridge** | MCP server that connects AI models with Autodesk tools via PyNET |
+| **pynet-mcp-bridge** | MCP server that connects AI models with desktop BIM tools via PyNET |
 | **mcp[cli]** (1.x) | Model Context Protocol SDK and CLI tools |
 | **psutil** | System process detection (finds running Autodesk instances) |
 
