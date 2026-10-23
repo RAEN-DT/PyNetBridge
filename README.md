@@ -86,7 +86,7 @@ This will automatically:
 The `pynet-mcp-bridge` package includes:
 | Package | Purpose |
 | :--- | :--- |
-| **pynet-mcp-bridge** | MCP server that connects AI models with Autodesk tools via PyNET |
+| **pynet-mcp-bridge** | MCP server that connects AI models with desktop BIM tools via PyNET |
 | **mcp[cli]** (1.x) | Model Context Protocol SDK and CLI tools |
 | **psutil** | System process detection (finds running Autodesk instances) |
 
