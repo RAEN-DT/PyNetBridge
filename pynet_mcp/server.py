@@ -439,6 +439,19 @@ def create_pynet_module(pid: int, name: str) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
+@mcp.tool(annotations={"title": "Update PyNet Module", "destructiveHint": True})
+def update_pynet_module(pid: int, module_id: str, name: str) -> str:
+    """Renames a module (max 30 characters, unique within the application). Cloud modules are read-only."""
+    payload = {
+        "Action": "UpdateModuleData",
+        "Metadata": {
+            "TargetPid": pid,
+            "ModuleId": module_id
+        },
+        "Content": name
+    }
+    return send_to_pipe(pid, payload, timeout=30.0)
+
 @mcp.tool(annotations={"title": "Delete PyNet Module", "destructiveHint": True})
 def delete_pynet_module(pid: int, module_id: str) -> str:
     """Permanently deletes a module and all its contents."""
