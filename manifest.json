@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "pynet-mcp-bridge",
   "display_name": "PyNet Platform Bridge",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Connects AI models with desktop BIM tools (Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE) via the PyNet ecosystem for BIM/engineering automation.",
   "long_description": "PyNet Platform Bridge is the execution layer that lets AI models control Autodesk tools in real time. It turns natural language into Python scripts that are validated by a built-in static analyzer and executed inside Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto and AVEVA UE through a local connection to the PyNet plugin. Capabilities include live BIM model queries, dynamic ribbon/UI creation, and controlled script execution.\n\nRequirements: Windows, Python 3.10 or higher, and the 'uv' package manager (https://docs.astral.sh/uv/) available on PATH — the server is launched via 'uvx pynet-mcp-bridge', which fetches the package from PyPI. Install uv with: winget install astral-sh.uv. Also requires the PyNet plugin installed in your host application.",
   "author": {
@@ -35,6 +35,7 @@
     { "name": "send_command_by_path", "description": "Executes a script file directly by path in the PyNet engine." },
     { "name": "configure_output_window", "description": "Toggles the visibility of the PyNet log/output window." },
     { "name": "create_pynet_module", "description": "Creates a new custom Tab (ButtonsModule) in the Ribbon." },
+    { "name": "update_pynet_module", "description": "Renames a module (max 30 characters, unique within the application). Cloud modules are read-only." },
     { "name": "delete_pynet_module", "description": "Permanently deletes a module and all its contents." },
     { "name": "deploy_script_button", "description": "Installs a new ScriptButton into a specific module." },
     { "name": "update_script_button", "description": "Updates metadata for an existing ScriptButton or moves it to another module." },
