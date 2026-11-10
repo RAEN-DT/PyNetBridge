@@ -17,6 +17,12 @@ SUPPORTED_PRODUCTS = {
     "revit.exe":   "Revit",
     "acad.exe":    "AutoCAD",
     "rhino.exe":   "Rhino",
+    # AVEVA Unified Engineering (E3D Design): PyNET loads in-process as a .NET add-in of the
+    # Design module, so the IPC pipe belongs to des.exe.
+    "des.exe":     "AVEVA UE",
+    # Autodesk Robot Structural Analysis: PyNET loads in-process as a COM add-in (IRobotAddIn),
+    # so the IPC pipe belongs to robot.exe. One add-in per Robot version (2025-2027).
+    "robot.exe":   "Robot",
     # Tekla has no in-process add-ins: PyNET runs in its own exe (one per Tekla version) that
     # connects to TeklaStructures.exe, so the IPC pipe belongs to that exe, not to Tekla.
     "raen.tekla.pynet.2023.exe": "Tekla Structures 2023",
@@ -62,6 +68,17 @@ ALLOWED_REFERENCES = {
     "Tekla.Structures.Dialog",
     "Tekla.Structures.Catalogs",  # profile / material / bolt catalogs
     "Tekla.Structures.Plugins",
+    # AVEVA Unified Engineering / E3D .NET API (also puts "Aveva" in ALLOWED_CLR_ROOTS,
+    # so `import Aveva` passes)
+    "Aveva.Core.Database",
+    "Aveva.Core.Geometry",
+    "Aveva.Core.Utilities",
+    "PMLNet",          # PML <-> .NET bridge; the assembly has no Aveva.* prefix in UE
+    "Aveva.ApplicationFramework",
+    "Aveva.ApplicationFramework.Presentation",
+    # Autodesk Robot Structural Analysis: RobotOM is COM, exposed to .NET by its interop assembly.
+    # Its namespace is "RobotOM", not "Interop", so that root is added to ALLOWED_CLR_ROOTS below.
+    "Interop.RobotOM",
     # RIB Presto: the host exe has no version suffix (AssemblyName Raen.Presto.Pynet), so
     # the "Raen.Presto.Pynet." prefix below never matches its exact name. Listed here too.
     "Raen.Presto.Pynet",
@@ -75,6 +92,8 @@ ALLOWED_REFERENCE_PREFIXES = (
     "Raen.Rhino.Pynet.",
     "Raen.Tekla.Pynet.",
     "Raen.Presto.Pynet.",
+    "Raen.Aveva.Pynet.",
+    "Raen.Robot.Pynet.",
 )
 
 ALLOWED_PYTHON_IMPORTS = {
@@ -117,6 +136,8 @@ BLOCKED_CALLS = {
 }
 
 ALLOWED_CLR_ROOTS = {ref.split(".")[0] for ref in ALLOWED_REFERENCES} | {p.split(".")[0] for p in ALLOWED_REFERENCE_PREFIXES}
+# Namespaces whose assembly name does not start with them: Interop.RobotOM -> `from RobotOM import ...`
+ALLOWED_CLR_ROOTS |= {"RobotOM"}
 
 
 class ScriptAnalyzer(ast.NodeVisitor):
@@ -306,7 +327,7 @@ async def _send_with_heartbeat(pid: int, payload: dict, timeout: float, ctx: Con
 
 @mcp.tool(annotations={"title": "List Active Instances", "readOnlyHint": True})
 def list_active_instances() -> str:
-    """Scans the system for running host processes (Autodesk, Rhino, PyNET for Tekla/Presto) with an active PyNet IPC pipe."""
+    """Scans the system for running host processes (Autodesk, Rhino, AVEVA UE, PyNET for Tekla/Presto) with an active PyNet IPC pipe."""
     instances = []
     for proc in psutil.process_iter(['pid', 'name']):
         try:

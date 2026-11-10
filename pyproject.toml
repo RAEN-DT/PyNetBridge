@@ -4,15 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pynet-mcp-bridge"
-version = "1.7.0"
-description = "MCP server that connects AI models with Navisworks, Revit, Civil 3D, Rhino and Tekla Structures via the PyNet ecosystem."
+version = "1.8.0"
+description = "MCP server that connects AI models with Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE and Robot Structural Analysis via the PyNet ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [
     { name = "RAEN Digital Tools" }
 ]
-keywords = ["mcp", "navisworks", "autodesk", "rhino", "tekla", "BIM", "pynet"]
+keywords = ["mcp", "navisworks", "autodesk", "rhino", "tekla", "aveva", "robot", "BIM", "pynet"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -26,8 +26,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Rafael-NunezDeArenas/PyNetBridge"
-Repository = "https://github.com/Rafael-NunezDeArenas/PyNetBridge"
+Homepage = "https://github.com/RAEN-DT/PyNetBridge"
+Repository = "https://github.com/RAEN-DT/PyNetBridge"
 
 [project.scripts]
 pynet-mcp-bridge = "pynet_mcp.server:main"
