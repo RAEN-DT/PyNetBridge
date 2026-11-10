@@ -7,7 +7,7 @@
   <a href="https://pypi.org/project/pynet-mcp-bridge/"><img src="https://img.shields.io/pypi/v/pynet-mcp-bridge?label=pypi&color=2b7489" alt="PyPI"/></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python"/>
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Windows"/>
-  <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D%20%C2%B7%20Rhino%20%C2%B7%20Tekla%20%C2%B7%20Presto%20%C2%B7%20AVEVA%20UE-orange" alt="Hosts"/>
+  <img src="https://img.shields.io/badge/hosts-Navisworks%20%C2%B7%20Revit%20%C2%B7%20Civil%203D%20%C2%B7%20Rhino%20%C2%B7%20Tekla%20%C2%B7%20Presto%20%C2%B7%20AVEVA%20UE%20%C2%B7%20Robot-orange" alt="Hosts"/>
   <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2" alt="MCP"/>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
 </p>
@@ -16,9 +16,9 @@
 
 **PyNet Bridge** is the execution layer that allows AI models to control desktop BIM tools in real-time.
 
-It connects Natural Language → Python → desktop BIM tools (Navisworks, Revit, AutoCAD, Rhino, Tekla Structures, RIB Presto, AVEVA UE), enabling AI to generate, execute, and refine BIM workflows autonomously.
+It connects Natural Language → Python → desktop BIM tools (Navisworks, Revit, AutoCAD, Rhino, Tekla Structures, RIB Presto, AVEVA UE, Robot Structural Analysis), enabling AI to generate, execute, and refine BIM workflows autonomously.
 
-Available integrations include **Navisworks Manage**, **Revit**, **Civil 3D**, **Rhino**, **Tekla Structures** (2023–2026), **RIB Presto** (budgets, COM API) and **AVEVA UE** (E3D Design .NET API).
+Available integrations include **Navisworks Manage**, **Revit**, **Civil 3D**, **Rhino**, **Tekla Structures** (2023–2026), **RIB Presto** (budgets, COM API), **AVEVA UE** (E3D Design .NET API) and **Robot Structural Analysis** (2025–2027, RobotOM COM API).
 
 This bridge acts as the connective tissue between AI logic and the desktop APIs of those hosts, allowing for dynamic UI creation, script execution, and BIM process automation using natural language.
 
@@ -293,7 +293,8 @@ Only these .NET references are permitted via `clr.AddReference`:
 - **Tekla Structures:** `Tekla.Structures`, `.Model`, `.Drawing`, `.Datatype`, `.Dialog`, `.Catalogs`, `.Plugins`
 - **RIB Presto:** none needed — scripts drive Presto through the `__presto__` scope variable (COM)
 - **AVEVA UE (E3D Design):** `Aveva.Core.Database`, `.Geometry`, `.Utilities`, `Aveva.ApplicationFramework`, `.Presentation`, `PMLNet`
-- **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`, `Raen.Rhino.Pynet.8`, `Raen.Tekla.Pynet.2026`, `Raen.Presto.Pynet`, `Raen.Aveva.Pynet.*`)
+- **Robot Structural Analysis:** `Interop.RobotOM` (imported as `from RobotOM import ...`; scripts cast the `__robot__` scope variable to `IRobotApplication`)
+- **PyNet plugins:** `Raen.Core.Pynet.*`, `Raen.{Product}.Pynet.*` (any version — e.g. `Raen.Core.Pynet.Resources`, `Raen.Navisworks.Pynet.2024`, `Raen.Civil3D.Pynet.2026`, `Raen.Rhino.Pynet.8`, `Raen.Tekla.Pynet.2026`, `Raen.Presto.Pynet`, `Raen.Aveva.Pynet.*`, `Raen.Robot.Pynet.2027`)
 
 ### Allowed Python Imports
 `clr`, `sys`, `json`, `re`, `time`, `datetime`, `pathlib`, `typing`, `threading`, `collections`, `xml`, `math`, `pandas`, `plotly`, `matplotlib`, `dash`, `webbrowser`, `psutil`, `functools`, `openpyxl`, `uuid`, `zipfile`, `io`, `mimetypes`, `difflib`, `csv`, `ifcopenshell`, `numpy`, `shapely`, `qgis`, `processing`, `pypdf`, `docx`, `rhinoscriptsyntax`, `scriptcontext`
@@ -347,7 +348,7 @@ This MCP is part of a modular system designed to enable AI-driven BIM automation
 
 This repository is designed to work alongside:
 
-- PyNet Platform → Executes scripts inside Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto & AVEVA UE via Python.NET  
+- PyNet Platform → Executes scripts inside Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE & Robot Structural Analysis via Python.NET  
 - PyNet Library → Gives the AI context with a Python scripts library 
 
 Together, these components enable:
@@ -356,7 +357,7 @@ Natural Language → AI → Python Script → PyNet → Host application → BIM
 
 | Component | Repository | Purpose |
 | :--- | :--- | :--- |
-| **PyNet Platform** | [PyNet](https://github.com/RAEN-DT/PyNet) | Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto & AVEVA UE plugin — hosts the Python.NET engine |
+| **PyNet Platform** | [PyNet](https://github.com/RAEN-DT/PyNet) | Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE & Robot Structural Analysis plugin — hosts the Python.NET engine |
 | **PyNet Bridge (MCP)** | This repo | MCP server - connects AI models to PyNET with including secure scripts validation|
 | **PyNet Library** | [PyNetLibrary](https://github.com/RAEN-DT/PyNetLibrary) | Script reference library and AI context |
 
@@ -379,7 +380,7 @@ Full privacy policy: **https://privacy.raendt.com/**
 
 ## 🖥️ Platform Support
 
-PyNet Bridge is **Windows-only**. It relies on Windows-specific local communication facilities and on desktop BIM applications (Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE), which are Windows products. macOS and Linux are not supported.
+PyNet Bridge is **Windows-only**. It relies on Windows-specific local communication facilities and on desktop BIM applications (Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE, Robot Structural Analysis), which are Windows products. macOS and Linux are not supported.
 
 ## 📄 License
 
