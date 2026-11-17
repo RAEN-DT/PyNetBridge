@@ -221,6 +221,7 @@ Once connected, the AI will have access to the full suite of PyNet tools:
 ### 🏗️ Module (Tab) Management
 * **get_pynet_ui_layout**: Fetches the full UI structure (ButtonsModules and ScriptButtons).
 * **create_pynet_module**: Creates a new custom Tab (ButtonsModule) in the Ribbon.
+* **update_pynet_module**: Renames a module (max 30 characters, unique within the application). Cloud modules are read-only.
 * **delete_pynet_module**: Permanently deletes a module and all its contents.
 
 ### 🔘 Button Management

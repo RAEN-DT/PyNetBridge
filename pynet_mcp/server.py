@@ -7,6 +7,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP, Context
+from pynet_mcp import guides
 
 mcp = FastMCP("PyNet Platform Bridge")
 
@@ -439,6 +440,19 @@ def create_pynet_module(pid: int, name: str) -> str:
     }
     return send_to_pipe(pid, payload, timeout=30.0)
 
+@mcp.tool(annotations={"title": "Update PyNet Module", "destructiveHint": True})
+def update_pynet_module(pid: int, module_id: str, name: str) -> str:
+    """Renames a module (max 30 characters, unique within the application). Cloud modules are read-only."""
+    payload = {
+        "Action": "UpdateModuleData",
+        "Metadata": {
+            "TargetPid": pid,
+            "ModuleId": module_id
+        },
+        "Content": name
+    }
+    return send_to_pipe(pid, payload, timeout=30.0)
+
 @mcp.tool(annotations={"title": "Delete PyNet Module", "destructiveHint": True})
 def delete_pynet_module(pid: int, module_id: str) -> str:
     """Permanently deletes a module and all its contents."""
@@ -802,6 +816,30 @@ def viewer_get_properties(
         "returned": len(page),
         "elements": page,
     }, ensure_ascii=False)
+
+
+# ---------------------------------------------------------------------------
+# PyNET guides: how to write scripts for each host, verified limits, recipes. Installed by
+# PyNET Library as a single packed file; read here, never shipped in this package.
+# ---------------------------------------------------------------------------
+
+@mcp.tool(annotations={"title": "List PyNET Guides", "readOnlyHint": True})
+def list_guides(contains: str = "") -> str:
+    """Lists the PyNET guides: per-host scripting guides (Revit, Navisworks, Civil 3D, Rhino...),
+    pythonnet rules and verified limits, UI and deployment notes. Read the relevant guide with
+    read_guide BEFORE writing a script for a host. `contains` filters by name or title."""
+    found = guides.list_guides(contains)
+    if not found and not guides.list_guides():
+        return json.dumps({"error": guides.NOT_INSTALLED}, ensure_ascii=False)
+    return json.dumps({"total": len(found), "guides": found}, ensure_ascii=False)
+
+
+@mcp.tool(annotations={"title": "Read PyNET Guide", "readOnlyHint": True})
+def read_guide(name: str) -> str:
+    """Returns one PyNET guide (Markdown) by the name list_guides gives, e.g. "docs/pythonnet";
+    the last part alone ("pythonnet") works when it is unique."""
+    text, error = guides.read_guide(name)
+    return text if text is not None else json.dumps({"error": error}, ensure_ascii=False)
 
 
 def main():
