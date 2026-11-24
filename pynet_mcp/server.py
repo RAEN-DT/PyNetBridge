@@ -2,6 +2,7 @@ import asyncio
 import json
 import psutil
 import ast
+import re
 import threading
 import urllib.request
 import urllib.error
@@ -21,8 +22,9 @@ SUPPORTED_PRODUCTS = {
     # AVEVA Unified Engineering (E3D Design): PyNET loads in-process as a .NET add-in of the
     # Design module, so the IPC pipe belongs to des.exe.
     "des.exe":     "AVEVA UE",
-    # Tekla has no in-process add-ins: PyNET runs in its own exe (one per Tekla version) that
+    # Tekla has no in-process add-ins: PyNET runs in its own exe (one per Tekla instance) that
     # connects to TeklaStructures.exe, so the IPC pipe belongs to that exe, not to Tekla.
+    # See _resolve_tekla_for_pynet for how the bound Tekla is found.
     "raen.tekla.pynet.2023.exe": "Tekla Structures 2023",
     "raen.tekla.pynet.2024.exe": "Tekla Structures 2024",
     "raen.tekla.pynet.2025.exe": "Tekla Structures 2025",
@@ -315,12 +317,126 @@ async def _send_with_heartbeat(pid: int, payload: dict, timeout: float, ctx: Con
         await ctx.report_progress(beat, None, f"Executing script... {elapsed} elapsed")
 
 
+# ─── Tekla instance resolution ───
+
+TEKLA_EXE_NAME = "teklastructures.exe"
+_TEKLA_PYNET_RE = re.compile(r"^raen\.tekla\.pynet\.(\d{4})\.exe$", re.IGNORECASE)
+_LAUNCHER_PID_RE = re.compile(r"^.*-(\d+)$")
+
+
+def _tekla_main_window_title(pid: int) -> str | None:
+    """Longest non-empty visible top-level window title of `pid`, or None. Windows only; never raises."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        enum_proc_type = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        user32.EnumWindows.argtypes = [enum_proc_type, wintypes.LPARAM]
+        user32.EnumWindows.restype = wintypes.BOOL
+        user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
+        user32.GetWindowThreadProcessId.restype = wintypes.DWORD
+        user32.IsWindowVisible.argtypes = [wintypes.HWND]
+        user32.IsWindowVisible.restype = wintypes.BOOL
+        user32.GetWindowTextLengthW.argtypes = [wintypes.HWND]
+        user32.GetWindowTextLengthW.restype = ctypes.c_int
+        user32.GetWindowTextW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+        user32.GetWindowTextW.restype = ctypes.c_int
+
+        titles: list[str] = []
+
+        def _callback(hwnd, _lparam):
+            try:
+                owner = wintypes.DWORD()
+                user32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
+                if owner.value == pid and user32.IsWindowVisible(hwnd):
+                    length = user32.GetWindowTextLengthW(hwnd)
+                    if length > 0:
+                        buffer = ctypes.create_unicode_buffer(length + 1)
+                        user32.GetWindowTextW(hwnd, buffer, length + 1)
+                        if buffer.value.strip():
+                            titles.append(buffer.value.strip())
+            except Exception:
+                pass
+            return True
+
+        user32.EnumWindows(enum_proc_type(_callback), 0)
+        return max(titles, key=len) if titles else None
+    except Exception:
+        return None
+
+
+def _resolve_tekla_for_pynet(pynet_pid: int, pynet_exe_name: str) -> tuple[int, str | None] | None:
+    """Finds the TeklaStructures.exe a PyNET for Tekla process is bound to.
+
+    Mirrors the PyNET side: the PyNET exe inherits SESSIONNAME from the Tekla macro that launched
+    it ("Console" for the first Tekla of a version, "Console-<teklaPid>" for later ones), and the
+    Open API connects through that name. Returns (tekla_pid, main_window_title_or_None), or None
+    when the Tekla cannot be determined. Never raises.
+    """
+    try:
+        match = _TEKLA_PYNET_RE.match(pynet_exe_name or "")
+        year = match.group(1) if match else None
+
+        try:
+            session_name = psutil.Process(pynet_pid).environ().get("SESSIONNAME")
+        except (psutil.Error, OSError):
+            session_name = None
+
+        teklas = []
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if (proc.info['name'] or "").lower() == TEKLA_EXE_NAME:
+                    teklas.append(proc)
+            except (psutil.Error, OSError):
+                continue
+
+        tekla_pid = None
+
+        # (a) Launched from a second (or later) Tekla: the PID is in SESSIONNAME.
+        launcher = _LAUNCHER_PID_RE.match(session_name or "")
+        if launcher:
+            wanted = int(launcher.group(1))
+            if any(p.info['pid'] == wanted for p in teklas):
+                tekla_pid = wanted
+
+        # (b) Otherwise the earliest-started Tekla of the same year (the one on plain "Console").
+        if tekla_pid is None and year:
+            folder = f"\\{year}.0\\"
+            best = None
+            for proc in teklas:
+                try:
+                    if folder not in (proc.exe() or "").lower():
+                        continue
+                    created = proc.create_time()
+                except (psutil.Error, OSError):
+                    continue
+                if best is None or created < best[0]:
+                    best = (created, proc.info['pid'])
+            if best is not None:
+                tekla_pid = best[1]
+
+        if tekla_pid is None:
+            return None
+        return tekla_pid, _tekla_main_window_title(tekla_pid)
+    except Exception:
+        return None
+
+
 # ─── System & Connection ───
 
 @mcp.tool(annotations={"title": "List Active Instances", "readOnlyHint": True})
 def list_active_instances() -> str:
-    """Scans the system for running host processes (Autodesk, Rhino, AVEVA UE, PyNET for Tekla/Presto) with an active PyNet IPC pipe."""
+    """Scans the system for running host processes (Autodesk, Rhino, AVEVA UE, PyNET for Tekla/Presto) with an active PyNet IPC pipe.
+
+    Each PyNET for Tekla is bound to exactly one Tekla Structures instance (same or different
+    version). Tekla entries carry that binding in brackets: `[Tekla PID <pid>, window: "<title>"]`
+    (the window title usually names the open model), or `[Tekla instance unknown]`.
+    When more than one Tekla is active, do not guess: identify the model the user means (ask if
+    the request does not say) and send to the PyNET PID bound to it.
+    """
     instances = []
+    tekla_count = 0
     for proc in psutil.process_iter(['pid', 'name']):
         try:
             name = proc.info['name'].lower()
@@ -331,13 +447,35 @@ def list_active_instances() -> str:
             pipe_path = f"\\\\.\\pipe\\tool_runner_{pid}"
             try:
                 with open(pipe_path, 'r+b'):
-                    instances.append(f"{product} (PID {pid})")
+                    pass
             except OSError:
                 continue
+
+            entry = f"{product} (PID {pid})"
+            if _TEKLA_PYNET_RE.match(name):
+                tekla_count += 1
+                tekla = _resolve_tekla_for_pynet(pid, name)
+                if tekla is None:
+                    entry += " [Tekla instance unknown]"
+                else:
+                    tekla_pid, title = tekla
+                    window = f'"{title}"' if title else "unknown"
+                    entry += f" [Tekla PID {tekla_pid}, window: {window}]"
+            instances.append(entry)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
 
-    return f"Active instances: {', '.join(instances)}" if instances else "No active instances found."
+    if not instances:
+        return "No active instances found."
+
+    result = f"Active instances: {', '.join(instances)}"
+    if tekla_count >= 2:
+        result += (
+            f"\nNote: {tekla_count} Tekla instances are active. Confirm which model the user means "
+            "and target that PID; if the window title is not conclusive, run a read-only check "
+            "(ia_Result = __teklamodel__.GetInfo().ModelName) on each PID first."
+        )
+    return result
 
 @mcp.tool(annotations={"title": "Check Plugin Status", "readOnlyHint": True})
 def check_plugin_status(pid: int) -> str:
@@ -354,7 +492,11 @@ def check_plugin_status(pid: int) -> str:
 
 @mcp.tool(annotations={"title": "Send Command", "destructiveHint": True})
 async def send_command(pid: int, script_name: str, content: str, timeout: float, ctx: Context) -> str:
-    """Direct script execution in the PyNet engine (Target PID, Script Name, Content)."""
+    """Direct script execution in the PyNet engine (Target PID, Script Name, Content).
+
+    With several Tekla instances active, make sure the PID is the PyNET bound to the model the user
+    wants (see list_active_instances); a script only ever affects the Tekla model its PyNET is bound to.
+    """
     valid, message = validate_script(content)
 
     if not valid:
@@ -373,7 +515,11 @@ async def send_command(pid: int, script_name: str, content: str, timeout: float,
 
 @mcp.tool(annotations={"title": "Send Command By Path", "destructiveHint": True})
 async def send_command_by_path(pid: int, script_name: str, file_path: str, timeout: float, ctx: Context) -> str:
-    """Executes a script file directly by path in the PyNet engine, without sending content inline."""
+    """Executes a script file directly by path in the PyNet engine, without sending content inline.
+
+    With several Tekla instances active, make sure the PID is the PyNET bound to the model the user
+    wants (see list_active_instances); a script only ever affects the Tekla model its PyNET is bound to.
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()

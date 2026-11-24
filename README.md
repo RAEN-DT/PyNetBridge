@@ -215,7 +215,7 @@ Once connected, the AI will have access to the full suite of PyNet tools:
 ### 🧠 Core capabilities exposed to AI
 
 ### 🔍 System & Connection
-* **list_active_instances**: Scans the system for running Autodesk processes with an active PyNet connection.
+* **list_active_instances**: Scans the system for running host processes with an active PyNet connection. Tekla entries show which Tekla instance (PID, window title) each PyNET is bound to; with several Teklas active, the AI confirms the model before targeting a PID.
 * **check_plugin_status**: Handshake ping to verify the plugin listener is responsive.
 
 ### 🏗️ Module (Tab) Management
