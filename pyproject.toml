@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pynet-mcp-bridge"
-version = "1.10.0"
+version = "1.11.0"
 description = "MCP server that connects AI models with Navisworks, Revit, Civil 3D, Rhino, Tekla Structures, RIB Presto, AVEVA UE and Robot Structural Analysis via the PyNet ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
