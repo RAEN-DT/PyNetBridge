@@ -397,8 +397,10 @@ def _resolve_tekla_for_pynet(pynet_pid: int, pynet_exe_name: str) -> tuple[int, 
         launcher = _LAUNCHER_PID_RE.match(session_name or "")
         if launcher:
             wanted = int(launcher.group(1))
-            if any(p.info['pid'] == wanted for p in teklas):
-                tekla_pid = wanted
+            # Its Tekla is gone: the earliest-started one below would be a different Tekla.
+            if not any(p.info['pid'] == wanted for p in teklas):
+                return None
+            tekla_pid = wanted
 
         # (b) Otherwise the earliest-started Tekla of the same year (the one on plain "Console").
         if tekla_pid is None and year:
